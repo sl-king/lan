@@ -1,0 +1,1062 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>User Administration App</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background-color: #f5f7fa;
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      width: 280px;
+      background: white;
+      border-right: 1px solid #e1e5e9;
+      padding: 24px 0;
+      box-shadow: 2px 0 4px rgba(0,0,0,0.1);
+    }
+
+    .sidebar-header {
+      padding: 0 24px 24px;
+      border-bottom: 1px solid #e1e5e9;
+      margin-bottom: 16px;
+    }
+
+    .sidebar-title {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 18px;
+      font-weight: 600;
+      color: #1a1a1a;
+      margin-bottom: 4px;
+    }
+
+    .sidebar-subtitle {
+      color: #6b7280;
+      font-size: 14px;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 24px;
+      color: #6b7280;
+      text-decoration: none;
+      transition: all 0.2s;
+      cursor: pointer;
+      border-left: 3px solid transparent;
+      min-height: 64px;
+    }
+
+    .nav-item:hover {
+      background-color: #f9fafb;
+      color: #374151;
+    }
+
+    .nav-item.active {
+      background-color: #f3f4f6;
+      color: #7c3aed;
+      border-left-color: #7c3aed;
+    }
+
+    .nav-item-icon {
+      width: 20px;
+      height: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .nav-item-text {
+      flex: 1;
+    }
+
+    .nav-item-title {
+      font-weight: 500;
+      margin-bottom: 2px;
+    }
+
+    .nav-item-subtitle {
+      font-size: 12px;
+      color: #9ca3af;
+    }
+
+    /* Main Content */
+    .main-content {
+      flex: 1;
+      padding: 32px;
+      background-color: #f5f7fa;
+    }
+
+    .page-header {
+      margin-bottom: 32px;
+    }
+
+    .page-title {
+      font-size: 28px;
+      font-weight: 700;
+      color: #1a1a1a;
+      margin-bottom: 8px;
+    }
+
+    .page-subtitle {
+      color: #6b7280;
+      font-size: 16px;
+    }
+
+    /* Cards */
+    .card {
+      background: white;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 24px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      border: 1px solid #e1e5e9;
+    }
+
+    .card-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: #1a1a1a;
+      margin-bottom: 16px;
+    }
+
+    /* Form Elements */
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    .form-label {
+      display: block;
+      font-weight: 500;
+      color: #374151;
+      margin-bottom: 8px;
+    }
+
+    .form-select {
+      width: 100%;
+      padding: 12px 16px;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      font-size: 14px;
+      background-color: white;
+      transition: border-color 0.2s;
+    }
+
+    .form-select:focus {
+      outline: none;
+      border-color: #7c3aed;
+      box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
+    }
+
+    /* User Details */
+    .user-details {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 16px 0;
+    }
+
+    .user-avatar {
+      width: 48px;
+      height: 48px;
+      background: #7c3aed;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 600;
+      font-size: 18px;
+    }
+
+    .user-info h3 {
+      font-size: 18px;
+      font-weight: 600;
+      color: #1a1a1a;
+      margin-bottom: 4px;
+    }
+
+    .user-info p {
+      color: #6b7280;
+      font-size: 14px;
+    }
+
+    /* Table Styles */
+    .access-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .access-table th {
+      background-color: #f9fafb;
+      padding: 12px 16px;
+      text-align: left;
+      font-weight: 600;
+      color: #374151;
+      border-bottom: 1px solid #e1e5e9;
+      font-size: 14px;
+    }
+
+    .access-table td {
+      padding: 12px 16px;
+      border-bottom: 1px solid #f3f4f6;
+      color: #374151;
+    }
+
+    .access-table tr:hover {
+      background-color: #f9fafb;
+    }
+
+    /* Checkbox Styles */
+    .checkbox-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .checkbox-wrapper input[type="checkbox"] {
+      width: 16px;
+      height: 16px;
+      accent-color: #7c3aed;
+    }
+
+    /* Search Results */
+    .search-results {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      background: white;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      max-height: 200px;
+      overflow-y: auto;
+      z-index: 1000;
+    }
+
+    .search-result-item {
+      padding: 12px 16px;
+      cursor: pointer;
+      border-bottom: 1px solid #f3f4f6;
+      transition: background-color 0.2s;
+    }
+
+    .search-result-item:hover {
+      background-color: #f9fafb;
+    }
+
+    .search-result-item:last-child {
+      border-bottom: none;
+    }
+
+    .search-result-item.selected {
+      background-color: #7c3aed;
+      color: white;
+    }
+
+    /* Button Styles */
+    .btn {
+      padding: 8px 16px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+
+    .btn-primary {
+      background: #7c3aed;
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: #6d28d9;
+    }
+
+    .btn-danger {
+      background: #ef4444;
+      color: white;
+    }
+
+    .btn-danger:hover {
+      background: #dc2626;
+    }
+
+    /* Hidden class */
+    .hidden {
+      display: none;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .sidebar {
+        width: 100%;
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: 1000;
+        transform: translateX(-100%);
+        transition: transform 0.3s;
+      }
+
+      .sidebar.open {
+        transform: translateX(0);
+      }
+
+      .main-content {
+        margin-left: 0;
+        padding: 16px;
+      }
+    }
+    #selectedProjectAccess > div {
+      background: rgba(255,255,255,0.6);
+      border-radius: 10px;
+      padding: 16px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+      margin-top: 8px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      align-items: flex-start;
+    }
+    .checkbox-wrapper label {
+      display: flex; align-items: center; gap: 18px;
+    }
+    .btn-save-small {
+      padding: 8px 16px;
+      font-size: 14px;
+      border-radius: 5px;
+      min-width: 0;
+      margin-top: 2px;
+    }
+    .filter-dropdown {
+      position: absolute;
+      top: 64px;
+      right: 28px;
+      background: white;
+      border: 1px solid #e1e5e9;
+      border-radius: 8px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.10);
+      min-width: 180px;
+      z-index: 1001;
+      display: flex;
+      flex-direction: column;
+      padding: 8px 0;
+    }
+    .filter-dropdown.hidden {
+      display: none;
+    }
+    .filter-dropdown-option {
+      padding: 12px 20px;
+      cursor: pointer;
+      font-size: 15px;
+      color: #374151;
+      transition: background 0.18s, color 0.18s;
+    }
+    .filter-dropdown-option:hover {
+      background: #f3f4f6;
+      color: #7c3aed;
+    }
+    .full-access-list {
+      margin-top: 10px;
+      background: #f9fafb;
+      border: 1px solid #e1e5e9;
+      border-radius: 8px;
+      padding: 12px 18px;
+      font-size: 15px;
+      color: #374151;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    }
+    .full-access-list-title {
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: #7c3aed;
+    }
+    .full-access-list ul {
+      list-style: none;
+      padding-left: 0;
+      margin: 0;
+    }
+    .full-access-list li {
+      padding: 4px 0;
+      border-bottom: 1px solid #ececec;
+    }
+    .full-access-list li:last-child {
+      border-bottom: none;
+    }
+  </style>
+</head>
+<body>
+  <div id="topNotification" style="display:none; position:fixed; top:0; left:0; width:100%; background:#16a34a; color:white; text-align:center; padding:14px 0; font-size:18px; z-index:2000; box-shadow:0 2px 8px rgba(0,0,0,0.08);"></div>
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-title">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M2 17L12 22L22 17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M2 12L12 17L22 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        Administracija uporabnikov
+      </div>
+    </div>
+
+    <div class="nav-item active" onclick="showTab('usersTab')">
+      <div class="nav-item-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M17 21V19C17 17.9391 16.5786 16.9217 15.8284 16.1716C15.0783 15.4214 14.0609 15 13 15H5C3.93913 15 2.92172 15.4214 2.17157 16.1716C1.42143 16.9217 1 17.9391 1 19V21" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <circle cx="9" cy="7" r="4" stroke="currentColor" stroke-width="2"/>
+          <path d="M23 21V19C22.9993 18.1137 22.7044 17.2528 22.1614 16.5523C21.6184 15.8519 20.8581 15.3516 20 15.13" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M16 3.13C16.8604 3.35031 17.623 3.85071 18.1676 4.55232C18.7122 5.25392 19.0078 6.11683 19.0078 7.005C19.0078 7.89317 18.7122 8.75608 18.1676 9.45768C17.623 10.1593 16.8604 10.6597 16 10.88" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <div class="nav-item-text">
+        <div class="nav-item-title">Uporabniki</div>
+        <div class="nav-item-subtitle">Pregled in upravljanje dostopa uporabnikov</div>
+      </div>
+    </div>
+
+    <div class="nav-item" onclick="showTab('projectsTab')">
+      <div class="nav-item-icon">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M22 19C22 19.5304 21.7893 20.0391 21.4142 20.4142C21.0391 20.7893 20.5304 21 20 21H4C3.46957 21 2.96086 20.7893 2.58579 20.4142C2.21071 20.0391 2 19.5304 2 19V5C2 4.46957 2.21071 3.96086 2.58579 3.58579C2.96086 3.21071 3.46957 3 4 3H9L11 6H20C20.5304 6 21.0391 6.21071 21.4142 6.58579C21.7893 6.96086 22 7.46957 22 8V19Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <div class="nav-item-text">
+        <div class="nav-item-title">Projekti</div>
+        <div class="nav-item-subtitle">Pregled dostopov do projektov</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="main-content">
+    <!-- Users Tab -->
+    <div id="usersTab" class="tab">
+      <div class="page-header">
+        <h1 class="page-title">Upravljanje uporabnikov</h1>
+        <p class="page-subtitle">Pregled in upravljanje dostopa uporabnikov</p>
+      </div>
+
+      <div class="card">
+        <h2 class="card-title">Izberi uporabnika:</h2>
+        <div class="form-group" style="position: relative;">
+          <input type="text" id="userSearch" class="form-select" placeholder="Vpiši ime uporabnika..." autocomplete="off" oninput="showUserSuggestions()" onclick="showUserSuggestions()" style="margin-bottom: 0;">
+          <div id="userSuggestions" class="search-results hidden"></div>
+        </div>
+      </div>
+
+      <div id="userAccessSection" class="hidden">
+        <div class="card">
+          <div id="userDetails" class="user-details">
+            <!-- Podrobnosti o uporabniku bodo prikazane tukaj -->
+          </div>
+          <h2 class="card-title" style="margin-top: 40px;">Dostop do projektov</h2>
+          <!-- Iskanje projektov -->
+          <div class="form-group">
+            <label for="projectSearch" class="form-label">Pregled in upravljanje dostopa do projektov:</label>
+            <div style="position: relative;">
+              <input type="text" id="projectSearch" class="form-select" placeholder="Vpiši ime projekta..." autocomplete="off" oninput="showProjectSuggestions()" onclick="showProjectSuggestions()" onblur="hideProjectSuggestionsOnBlur()">
+              <div id="projectSuggestions" class="search-results hidden"></div>
+            </div>
+          </div>
+          <div id="selectedProjectAccess" class="form-group hidden"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Projects Tab -->
+    <div id="projectsTab" class="tab hidden">
+      <div class="page-header">
+        <h1 class="page-title">Upravljanje projektov</h1>
+        <p class="page-subtitle">Pregled dostopov do projektov</p>
+      </div>
+
+      <div class="card">
+        <h2 class="card-title">Izberi projekt:</h2>
+        <div class="form-group" style="position: relative;">
+          <input type="text" id="projectTabSearch" class="form-select" placeholder="Vpiši ime projekta..." autocomplete="off" oninput="showProjectTabSuggestions()" onclick="showProjectTabSuggestions()">
+          <div id="projectTabSuggestions" class="search-results hidden"></div>
+          <input type="hidden" id="projectTabSelectValue">
+        </div>
+      </div>
+
+      <div id="projectAccessSection" class="hidden">
+        <div class="card" style="position: relative;">
+          <div id="projectDetails" class="user-details">
+            <!-- Podrobnosti o projektu bodo prikazane tukaj -->
+          </div>
+          <button id="filterAccessBtn" style="position: absolute; top: 28px; right: 28px; width: 32px; height: 32px; background: none; border: none; padding: 0; cursor: pointer; z-index: 10; display: flex; align-items: center; justify-content: center;" aria-label="Filter access options">
+            <svg style="width: 28px; height: 28px; color: #7c3aed;" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path d="M4 4h16l-6.5 8.5v5a1.5 1.5 0 0 1-3 0v-5L4 4z"/>
+            </svg>
+          </button>
+          <div id="filterAccessDropdown" class="filter-dropdown hidden">
+            <div class="filter-dropdown-option" onclick="selectAccessFilter('full')">Poln dostop</div>
+            <div class="filter-dropdown-option" onclick="selectAccessFilter('read')">Samo read dostop</div>
+            <div class="filter-dropdown-option" onclick="selectAccessFilter('none')">Brez dostopa</div>
+          </div>
+          <div class="form-group" style="position: relative; margin-top: 24px;">
+            <label for="projectUserSearch" class="form-label">Poišči uporabnika za ta projekt:</label>
+            <div style="position: relative; display: flex; align-items: center;">
+              <input type="text" id="projectUserSearch" class="form-select" placeholder="Vpiši ime uporabnika..." autocomplete="off" oninput="showProjectUserSuggestions()" onclick="showProjectUserSuggestions()" style="flex:1;">
+              <svg style="position: absolute; right: 12px; width: 20px; height: 20px; pointer-events: none; color: #9ca3af;" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            </div>
+            <div id="projectUserSuggestions" class="search-results hidden"></div>
+            <input type="hidden" id="projectUserSelectValue">
+          </div>
+          <div id="fullAccessUserList" class="full-access-list hidden"></div>
+          <div id="projectUserAccessCard" class="form-group hidden"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let users = [];
+    let projects = [];
+    let access = [];
+
+    // Load data from JSON files
+    async function loadData() {
+      try {
+        const [usersResponse, projectsResponse, accessResponse] = await Promise.all([
+          fetch('users.json'),
+          fetch('projects.json'),
+          fetch('access.json')
+        ]);
+
+        users = await usersResponse.json();
+        projects = await projectsResponse.json();
+        access = await accessResponse.json();
+
+        // Init dropdowns
+        // Reset user search field and suggestions
+        if (document.getElementById('userSearch')) document.getElementById('userSearch').value = '';
+        if (document.getElementById('userSuggestions')) document.getElementById('userSuggestions').classList.add('hidden');
+        if (document.getElementById('userSelectValue')) document.getElementById('userSelectValue').value = '';
+        // Reset project tab search field and suggestions
+        if (document.getElementById('projectTabSearch')) document.getElementById('projectTabSearch').value = '';
+        if (document.getElementById('projectTabSuggestions')) document.getElementById('projectTabSuggestions').classList.add('hidden');
+        if (document.getElementById('projectTabSelectValue')) document.getElementById('projectTabSelectValue').value = '';
+      } catch (error) {
+        console.error('Error loading data:', error);
+        alert('Error loading data from JSON files. Please check that users.json, projects.json, and access.json exist in the same folder.');
+      }
+    }
+
+    // Load data when page loads
+    loadData();
+
+    function showTab(tabId) {
+      // Hide all tabs
+      document.getElementById('usersTab').classList.add('hidden');
+      document.getElementById('projectsTab').classList.add('hidden');
+      
+      // Show selected tab
+      document.getElementById(tabId).classList.remove('hidden');
+      
+      // Update navigation active state
+      document.querySelectorAll('.nav-item').forEach(item => {
+        item.classList.remove('active');
+      });
+      event.currentTarget.classList.add('active');
+    }
+
+    let selectedProjectId = null;
+    let selectedProjectName = null;
+
+    // Project autocomplete dropdown logic
+    function showProjectSuggestions() {
+      const input = document.getElementById('projectSearch');
+      const suggestionsDiv = document.getElementById('projectSuggestions');
+      const search = input.value.toLowerCase();
+      suggestionsDiv.innerHTML = '';
+      const filtered = projects.filter(p => p.name.toLowerCase().includes(search));
+      if (filtered.length === 0) {
+        suggestionsDiv.classList.add('hidden');
+        return;
+      }
+      filtered.forEach(p => {
+        const item = document.createElement('div');
+        item.className = 'search-result-item';
+        item.textContent = p.name;
+        item.onclick = () => selectProjectFromSuggestion(p.id, p.name);
+        suggestionsDiv.appendChild(item);
+      });
+      suggestionsDiv.classList.remove('hidden');
+    }
+
+    function selectProjectFromSuggestion(projectId, projectName) {
+      selectedProjectId = projectId;
+      selectedProjectName = projectName;
+      document.getElementById('projectSearch').value = projectName;
+      document.getElementById('projectSuggestions').classList.add('hidden');
+      showSelectedProjectAccess();
+    }
+
+    let projectEditMode = false;
+    function showSelectedProjectAccess() {
+      const userId = parseInt(document.getElementById('userSelectValue').value);
+      const accessDiv = document.getElementById('selectedProjectAccess');
+      if (!selectedProjectId || !userId) {
+        accessDiv.classList.add('hidden');
+        accessDiv.innerHTML = '';
+        return;
+      }
+      let a = access.find(ac => ac.user_id === userId && ac.project_id === selectedProjectId) || { read_access: false, write_access: false };
+      let html = `<div style=\"margin-top: 16px; display: flex; flex-direction: column; align-items: flex-start; gap: 16px;\">`;
+      if (!projectEditMode) {
+        html += `<div style=\"font-size: 18px; font-weight: 500; margin-bottom: 10px;\">${selectedProjectName}</div>`;
+        html += `<div style=\"display: flex; flex-direction: column; gap: 12px;\">
+          <div>Read: ${a.read_access ? 'Da' : 'Ne'}</div>
+          <div>Write: ${a.write_access ? 'Da' : 'Ne'}</div>
+          <button onclick=\"editSelectedProjectAccess()\" class=\"btn btn-primary btn-save-small\" style=\"margin-top: 8px;\">Uredi</button>
+        </div>`;
+      } else {
+        html += `<div style=\"font-size: 18px; font-weight: 500; margin-bottom: 10px;\">${selectedProjectName}</div>`;
+        html += `<div style=\"display: flex; flex-direction: column; gap: 12px;\">
+          <label style=\"display: flex; align-items: center; gap: 18px;\">
+            <input type=\"checkbox\" id=\"readAccessCheckbox\" ${a.read_access ? 'checked' : ''} onchange=\"toggleWriteCheckbox()\">
+            Read
+          </label>
+          <label style=\"display: flex; align-items: center; gap: 18px;\">
+            <input type=\"checkbox\" id=\"writeAccessCheckbox\" ${a.write_access ? 'checked' : ''} ${!a.read_access ? 'disabled' : ''}>
+            Write
+          </label>
+          <button onclick=\"saveSelectedProjectAccess()\" class=\"btn btn-primary btn-save-small\" style=\"margin-top: 8px;\">Shrani spremembe</button>
+        </div>`;
+      }
+      // Remove inline confirmation message
+      html += `</div>`;
+      accessDiv.innerHTML = html;
+      accessDiv.classList.remove('hidden');
+    }
+
+    function editSelectedProjectAccess() {
+      projectEditMode = true;
+      showSelectedProjectAccess();
+    }
+
+    function saveSelectedProjectAccess() {
+      const userId = parseInt(document.getElementById('userSelectValue').value);
+      if (!selectedProjectId || !userId) return;
+      const readChecked = document.getElementById('readAccessCheckbox').checked;
+      const writeChecked = document.getElementById('writeAccessCheckbox').checked;
+      let entry = access.find(a => a.user_id === userId && a.project_id === selectedProjectId);
+      if (!entry) {
+        entry = { user_id: userId, project_id: selectedProjectId, read_access: false, write_access: false };
+        access.push(entry);
+      }
+      entry.read_access = readChecked;
+      entry.write_access = writeChecked;
+      // Show confirmation as top notification
+      showTopNotification('Dostop uspešno shranjen.');
+      projectEditMode = false;
+      showSelectedProjectAccess();
+      console.log('Saved access:', access);
+    }
+
+    // Show user suggestions as dropdown below the input
+    function showUserSuggestions() {
+      const input = document.getElementById('userSearch');
+      const suggestionsDiv = document.getElementById('userSuggestions');
+      const search = input.value.toLowerCase();
+      suggestionsDiv.innerHTML = '';
+      const filtered = users.filter(u => u.name.toLowerCase().includes(search));
+      if (filtered.length === 0) {
+        suggestionsDiv.classList.add('hidden');
+        return;
+      }
+      filtered.forEach(u => {
+        const item = document.createElement('div');
+        item.className = 'search-result-item';
+        item.textContent = u.name;
+        item.onclick = () => selectUserFromSuggestion(u.id, u.name);
+        suggestionsDiv.appendChild(item);
+      });
+      suggestionsDiv.classList.remove('hidden');
+    }
+
+    function selectUserFromSuggestion(userId, userName) {
+      document.getElementById('userSearch').value = userName;
+      document.getElementById('userSuggestions').classList.add('hidden');
+      // Set the selected user and load access
+      // Find the user in the users array to get the id
+      document.getElementById('userSelectValue').value = userId;
+      loadUserAccess();
+    }
+
+    // Add a hidden input to store the selected user id
+    // Place this after the userSearch input
+    document.addEventListener('DOMContentLoaded', function() {
+      const userSearch = document.getElementById('userSearch');
+      if (userSearch && !document.getElementById('userSelectValue')) {
+        const hiddenInput = document.createElement('input');
+        hiddenInput.type = 'hidden';
+        hiddenInput.id = 'userSelectValue';
+        userSearch.parentNode.appendChild(hiddenInput);
+      }
+    });
+
+    // Hide user suggestions dropdown when clicking outside
+    document.addEventListener('click', function(event) {
+      const userSearch = document.getElementById('userSearch');
+      const userSuggestions = document.getElementById('userSuggestions');
+      if (!userSearch || !userSuggestions) return;
+      if (!userSearch.contains(event.target) && !userSuggestions.contains(event.target)) {
+        userSuggestions.classList.add('hidden');
+      }
+    });
+
+    // Hide project suggestions dropdown when input loses focus (with a slight delay to allow click)
+    function hideProjectSuggestionsOnBlur() {
+      setTimeout(function() {
+        const suggestionsDiv = document.getElementById('projectSuggestions');
+        if (suggestionsDiv) suggestionsDiv.classList.add('hidden');
+      }, 120);
+    }
+
+    function loadUserAccess() {
+      const userId = parseInt(document.getElementById('userSelectValue').value);
+      const section = document.getElementById('userAccessSection');
+      const userDetails = document.getElementById('userDetails');
+      // Hide selected project access and reset project search
+      document.getElementById('selectedProjectAccess').classList.add('hidden');
+      document.getElementById('selectedProjectAccess').innerHTML = '';
+      selectedProjectId = null;
+      selectedProjectName = null;
+      if (document.getElementById('projectSearch')) document.getElementById('projectSearch').value = '';
+      if (document.getElementById('projectSuggestions')) document.getElementById('projectSuggestions').classList.add('hidden');
+      if (!userId) return section.classList.add('hidden');
+      // Load user details
+      const user = users.find(u => u.id === userId);
+      if (user) {
+        userDetails.innerHTML = `
+          <div class="user-avatar">${user.name.charAt(0)}</div>
+          <div class="user-info">
+            <h3>${user.name}</h3>
+            <p>${user.email || 'Ni e-pošte'}</p>
+          </div>
+        `;
+      }
+      section.classList.remove('hidden');
+    }
+
+    // Project tab autocomplete dropdown logic
+    function showProjectTabSuggestions() {
+      const input = document.getElementById('projectTabSearch');
+      const suggestionsDiv = document.getElementById('projectTabSuggestions');
+      const search = input.value.toLowerCase();
+      suggestionsDiv.innerHTML = '';
+      let filtered = [];
+      if (!search) {
+        filtered = projects;
+      } else {
+        filtered = projects.filter(p => p.name.toLowerCase().includes(search));
+      }
+      if (filtered.length === 0) {
+        suggestionsDiv.classList.add('hidden');
+        return;
+      }
+      filtered.forEach(p => {
+        const item = document.createElement('div');
+        item.className = 'search-result-item';
+        item.textContent = p.name;
+        item.onclick = () => selectProjectTabFromSuggestion(p.id, p.name);
+        suggestionsDiv.appendChild(item);
+      });
+      suggestionsDiv.classList.remove('hidden');
+    }
+
+    function selectProjectTabFromSuggestion(projectId, projectName) {
+      document.getElementById('projectTabSearch').value = projectName;
+      document.getElementById('projectTabSuggestions').classList.add('hidden');
+      document.getElementById('projectTabSelectValue').value = projectId;
+      loadProjectAccess();
+      // NEW: Reset user search for project
+      if (document.getElementById('projectUserSearch')) document.getElementById('projectUserSearch').value = '';
+      if (document.getElementById('projectUserSuggestions')) document.getElementById('projectUserSuggestions').classList.add('hidden');
+      if (document.getElementById('projectUserSelectValue')) document.getElementById('projectUserSelectValue').value = '';
+      if (document.getElementById('projectUserAccessCard')) {
+        document.getElementById('projectUserAccessCard').classList.add('hidden');
+        document.getElementById('projectUserAccessCard').innerHTML = '';
+      }
+    }
+
+    // NEW: User search for selected project
+    function showProjectUserSuggestions() {
+      const input = document.getElementById('projectUserSearch');
+      const suggestionsDiv = document.getElementById('projectUserSuggestions');
+      const search = input.value.toLowerCase();
+      suggestionsDiv.innerHTML = '';
+      const filtered = users.filter(u => u.name.toLowerCase().includes(search));
+      if (filtered.length === 0) {
+        suggestionsDiv.classList.add('hidden');
+        return;
+      }
+      filtered.forEach(u => {
+        const item = document.createElement('div');
+        item.className = 'search-result-item';
+        item.textContent = u.name;
+        item.onclick = () => selectProjectUserFromSuggestion(u.id, u.name);
+        suggestionsDiv.appendChild(item);
+      });
+      suggestionsDiv.classList.remove('hidden');
+      // Hide filter results when typing
+      const listDiv = document.getElementById('fullAccessUserList');
+      if (listDiv) listDiv.classList.add('hidden');
+    }
+
+    function selectProjectUserFromSuggestion(userId, userName) {
+      document.getElementById('projectUserSearch').value = userName;
+      document.getElementById('projectUserSuggestions').classList.add('hidden');
+      document.getElementById('projectUserSelectValue').value = userId;
+      showProjectUserAccessCard();
+      // Hide filter results when a user is selected
+      const listDiv = document.getElementById('fullAccessUserList');
+      if (listDiv) listDiv.classList.add('hidden');
+    }
+
+    // Hide project user suggestions dropdown when clicking outside
+    document.addEventListener('click', function(event) {
+      const projectUserSearch = document.getElementById('projectUserSearch');
+      const projectUserSuggestions = document.getElementById('projectUserSuggestions');
+      if (!projectUserSearch || !projectUserSuggestions) return;
+      if (!projectUserSearch.contains(event.target) && !projectUserSuggestions.contains(event.target)) {
+        projectUserSuggestions.classList.add('hidden');
+      }
+    });
+
+    function showProjectUserAccessCard() {
+      const projectId = parseInt(document.getElementById('projectTabSelectValue').value);
+      const userId = parseInt(document.getElementById('projectUserSelectValue').value);
+      const cardDiv = document.getElementById('projectUserAccessCard');
+      if (!projectId || !userId) {
+        cardDiv.classList.add('hidden');
+        cardDiv.innerHTML = '';
+        return;
+      }
+      let a = access.find(ac => ac.user_id === userId && ac.project_id === projectId) || { read_access: false, write_access: false };
+      let user = users.find(u => u.id === userId);
+      let project = projects.find(p => p.id === projectId);
+      let html = `<div style=\"margin-top: 8px; display: flex; flex-direction: column; align-items: flex-start; gap: 12px;\">`;
+      html += `<div style=\"font-size: 18px; font-weight: 500;\">${user ? user.name : ''} (${project ? project.name : ''})</div>`;
+      html += `<div>Read: ${a.read_access ? 'Da' : 'Ne'}</div>`;
+      html += `<div>Write: ${a.write_access ? 'Da' : 'Ne'}</div>`;
+      html += `</div>`;
+      cardDiv.innerHTML = html;
+      cardDiv.classList.remove('hidden');
+    }
+
+    function toggleProjectUserWriteCheckbox() {
+      const read = document.getElementById('projectUserReadAccessCheckbox');
+      const write = document.getElementById('projectUserWriteAccessCheckbox');
+      if (!read.checked) {
+        write.checked = false;
+        write.disabled = true;
+      } else {
+        write.disabled = false;
+      }
+    }
+
+    function saveProjectUserAccess() {
+      const projectId = parseInt(document.getElementById('projectTabSelectValue').value);
+      const userId = parseInt(document.getElementById('projectUserSelectValue').value);
+      if (!projectId || !userId) return;
+      const readChecked = document.getElementById('projectUserReadAccessCheckbox').checked;
+      const writeChecked = document.getElementById('projectUserWriteAccessCheckbox').checked;
+      let entry = access.find(a => a.user_id === userId && a.project_id === projectId);
+      if (!entry) {
+        entry = { user_id: userId, project_id: projectId, read_access: false, write_access: false };
+        access.push(entry);
+      }
+      entry.read_access = readChecked;
+      entry.write_access = writeChecked;
+      showTopNotification('Dostop uspešno shranjen.');
+      showProjectUserAccessCard();
+      loadProjectAccess(); // Refresh table
+    }
+
+    // Hide project tab suggestions dropdown when clicking outside
+    document.addEventListener('click', function(event) {
+      const projectTabSearch = document.getElementById('projectTabSearch');
+      const projectTabSuggestions = document.getElementById('projectTabSuggestions');
+      if (!projectTabSearch || !projectTabSuggestions) return;
+      if (!projectTabSearch.contains(event.target) && !projectTabSuggestions.contains(event.target)) {
+        projectTabSuggestions.classList.add('hidden');
+      }
+    });
+
+    function loadProjectAccess() {
+      const projectId = parseInt(document.getElementById('projectTabSelectValue').value);
+      const section = document.getElementById('projectAccessSection');
+      const projectDetails = document.getElementById('projectDetails');
+      if (!projectId) return section.classList.add('hidden');
+      // Load project details
+      const project = projects.find(p => p.id === projectId);
+      if (project) {
+        projectDetails.innerHTML = `
+          <div class="user-avatar">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M22 19C22 19.5304 21.7893 20.0391 21.4142 20.4142C21.0391 20.7893 20.5304 21 20 21H4C3.46957 21 2.96086 20.7893 2.58579 20.4142C2.21071 20.0391 2 19.5304 2 19V5C2 4.46957 2.21071 3.96086 2.58579 3.58579C2.96086 3.21071 3.46957 3 4 3H9L11 6H20C20.5304 6 21.0391 6.21071 21.4142 6.58579C21.7893 6.96086 22 7.46957 22 8V19Z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <div class="user-info">
+            <h3>${project.name}</h3>
+            <p>ID projekta: ${project.id}</p>
+          </div>
+        `;
+      }
+      // Always show the section (user search and access card)
+      section.classList.remove('hidden');
+    }
+
+    // Disable write checkbox if read is not checked
+    function toggleWriteCheckbox() {
+      const read = document.getElementById('readAccessCheckbox');
+      const write = document.getElementById('writeAccessCheckbox');
+      if (!read.checked) {
+        write.checked = false;
+        write.disabled = true;
+      } else {
+        write.disabled = false;
+      }
+    }
+
+    // Show a notification at the top of the screen
+    function showTopNotification(msg) {
+      const notif = document.getElementById('topNotification');
+      notif.textContent = msg;
+      notif.style.display = 'block';
+      setTimeout(() => {
+        notif.style.display = 'none';
+      }, 2000);
+    }
+
+    // Filter access dropdown logic
+    const filterBtn = document.getElementById('filterAccessBtn');
+    const filterDropdown = document.getElementById('filterAccessDropdown');
+    if (filterBtn && filterDropdown) {
+      filterBtn.addEventListener('click', function(event) {
+        event.stopPropagation();
+        filterDropdown.classList.toggle('hidden');
+      });
+      // Hide dropdown when clicking outside
+      document.addEventListener('click', function(event) {
+        if (!filterDropdown.contains(event.target) && event.target !== filterBtn) {
+          filterDropdown.classList.add('hidden');
+        }
+      });
+    }
+    function selectAccessFilter(option) {
+      // Show/hide full access user list based on filter
+      const listDiv = document.getElementById('fullAccessUserList');
+      if (option === 'full') {
+        // Clear search box and hide suggestions and user access card
+        const searchInput = document.getElementById('projectUserSearch');
+        if (searchInput) searchInput.value = '';
+        const suggestionsDiv = document.getElementById('projectUserSuggestions');
+        if (suggestionsDiv) suggestionsDiv.classList.add('hidden');
+        const userAccessCard = document.getElementById('projectUserAccessCard');
+        if (userAccessCard) {
+          userAccessCard.classList.add('hidden');
+          userAccessCard.innerHTML = '';
+        }
+        // Get selected project
+        const projectId = parseInt(document.getElementById('projectTabSelectValue').value);
+        if (!projectId) {
+          listDiv.classList.add('hidden');
+          return;
+        }
+        // Find users with full access for this project
+        const fullUsers = access.filter(a => a.project_id === projectId && a.read_access && a.write_access)
+          .map(a => users.find(u => u.id === a.user_id))
+          .filter(Boolean);
+        if (fullUsers.length === 0) {
+          listDiv.innerHTML = '<div class="full-access-list-title">Uporabniki s polnim dostopom</div><div>Ni uporabnikov s polnim dostopom.</div>';
+        } else {
+          listDiv.innerHTML = '<div class="full-access-list-title">Uporabniki s polnim dostopom</div>' +
+            '<ul>' + fullUsers.map(u => `<li>${u.name}${u.email ? ' (' + u.email + ')' : ''}</li>`).join('') + '</ul>';
+        }
+        listDiv.classList.remove('hidden');
+      } else if (option === 'read') {
+        // Clear search box and hide suggestions and user access card
+        const searchInput = document.getElementById('projectUserSearch');
+        if (searchInput) searchInput.value = '';
+        const suggestionsDiv = document.getElementById('projectUserSuggestions');
+        if (suggestionsDiv) suggestionsDiv.classList.add('hidden');
+        const userAccessCard = document.getElementById('projectUserAccessCard');
+        if (userAccessCard) {
+          userAccessCard.classList.add('hidden');
+          userAccessCard.innerHTML = '';
+        }
+        // Get selected project
+        const projectId = parseInt(document.getElementById('projectTabSelectValue').value);
+        if (!projectId) {
+          listDiv.classList.add('hidden');
+          return;
+        }
+        // Find users with only read access for this project
+        const readUsers = access.filter(a => a.project_id === projectId && a.read_access && !a.write_access)
+          .map(a => users.find(u => u.id === a.user_id))
+          .filter(Boolean);
+        if (readUsers.length === 0) {
+          listDiv.innerHTML = '<div class="full-access-list-title">Uporabniki s samo read dostopom</div><div>Ni uporabnikov s samo read dostopom.</div>';
+        } else {
+          listDiv.innerHTML = '<div class="full-access-list-title">Uporabniki s samo read dostopom</div>' +
+            '<ul>' + readUsers.map(u => `<li>${u.name}${u.email ? ' (' + u.email + ')' : ''}</li>`).join('') + '</ul>';
+        }
+        listDiv.classList.remove('hidden');
+      } else if (option === 'none') {
+        // Clear search box and hide suggestions and user access card
+        const searchInput = document.getElementById('projectUserSearch');
+        if (searchInput) searchInput.value = '';
+        const suggestionsDiv = document.getElementById('projectUserSuggestions');
+        if (suggestionsDiv) suggestionsDiv.classList.add('hidden');
+        const userAccessCard = document.getElementById('projectUserAccessCard');
+        if (userAccessCard) {
+          userAccessCard.classList.add('hidden');
+          userAccessCard.innerHTML = '';
+        }
+        // Get selected project
+        const projectId = parseInt(document.getElementById('projectTabSelectValue').value);
+        if (!projectId) {
+          listDiv.classList.add('hidden');
+          return;
+        }
+        // Find users with no access for this project
+        const noAccessUsers = users.filter(u => {
+          const a = access.find(ac => ac.user_id === u.id && ac.project_id === projectId);
+          return !a || (!a.read_access && !a.write_access);
+        });
+        if (noAccessUsers.length === 0) {
+          listDiv.innerHTML = '<div class="full-access-list-title">Uporabniki brez dostopa</div><div>Ni uporabnikov brez dostopa.</div>';
+        } else {
+          listDiv.innerHTML = '<div class="full-access-list-title">Uporabniki brez dostopa</div>' +
+            '<ul>' + noAccessUsers.map(u => `<li>${u.name}${u.email ? ' (' + u.email + ')' : ''}</li>`).join('') + '</ul>';
+        }
+        listDiv.classList.remove('hidden');
+      } else {
+        listDiv.classList.add('hidden');
+      }
+      filterDropdown.classList.add('hidden');
+    }
+  </script>
+</body>
+</html>
