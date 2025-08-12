@@ -1,0 +1,14 @@
+{
+  "name": "add_app2",
+  "version": "1.0.0",
+  "private": true,
+  "description": "User administration app with backend to persist access.json",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2"
+  }
+}
+
