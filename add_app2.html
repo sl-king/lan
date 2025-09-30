@@ -143,6 +143,7 @@
       display: block;
       font-weight: 500;
       color: #374151;
+      font-size: 14px;
       margin-bottom: 8px;
     }
 
@@ -464,7 +465,7 @@
       <div class="card">
         <h2 class="card-title">Izberi uporabnika:</h2>
         <div class="form-group" style="position: relative;">
-          <input type="text" id="userSearch" class="form-select" placeholder="Vpiši ime uporabnika..." autocomplete="off" oninput="showUserSuggestions()" onclick="showUserSuggestions()" style="margin-bottom: 0;">
+          <input type="text" id="userSearch" class="form-select" placeholder="Vpiši ime uporabnika..." autocomplete="off" oninput="showUserSuggestions()" onclick="showUserSuggestions()" onfocus="showUserSuggestions()" style="margin-bottom: 0;">
           <div id="userSuggestions" class="search-results hidden"></div>
         </div>
       </div>
@@ -486,7 +487,7 @@
           </div>
           <!-- Iskanje projektov -->
           <div class="form-group" style="position: relative;">
-            <label for="userProjectSearch" class="form-label">Pregled in upravljanje dostopa do projektov:</label>
+            <label for="userProjectSearch" class="form-label">Pregled in upravljanje dostopa do posameznih projektov:</label>
             <div style="position: relative; display: flex; align-items: center; flex-wrap: wrap; gap: 6px; min-height: 48px; background: #fff; border-radius: 8px; border: 1px solid #d1d5db; padding: 4px 8px;">
               <div id="userProjectChips" style="display: flex; align-items: center; flex-wrap: wrap; gap: 6px;"></div>
               <input type="text" id="userProjectSearch" class="form-select" placeholder="Vpiši ime projekta..." autocomplete="off" oninput="showUserProjectSuggestions()" onclick="showUserProjectSuggestions()" style="flex:1; min-width: 120px; border: none; box-shadow: none; outline: none; padding: 8px 0; background: transparent;">
@@ -495,6 +496,31 @@
             <input type="hidden" id="userProjectSelectValue">
           </div>
           <div id="userProjectAccessCard" class="form-group hidden"></div>
+          <div class="form-group" style="margin-top: 28px;">
+            <button id="userAllProjectsBtn" type="button" style="width: 100%; display: flex; align-items: center; background: #fff; border: 1px solid #d1d5db; border-radius: 8px; padding: 4px 8px; min-height: 48px; font-family: inherit; font-size: 14px; line-height: 20px; letter-spacing: normal; text-transform: none; font-weight: 500; color: #374151; cursor: pointer;" onclick="toggleAllProjectsAccess()">
+              Upravljanje dostopa do vseh projektov
+            </button>
+          </div>
+          <div id="userAllProjectsAccessCard" class="form-group hidden" style="margin-top: 24px;">
+            <div style="display: flex; flex-direction: column; align-items: center; gap: 24px; padding: 32px 0;">
+              <div style="display: flex; flex-direction: column; gap: 16px; align-items: center;">
+                <div style="display: flex; gap: 20px; justify-content: center; flex-wrap: wrap;">
+                  <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; padding: 12px 20px; border: 2px solid #e5e7eb; border-radius: 8px; background: #f9fafb; color: #374151; transition: all 0.2s;" id="userAllProjectsNoAccessLabel">
+                    <input type="radio" name="userAllProjectsAccessLevel" value="none" onchange="setAllProjectsAccessLevel('none')" style="margin: 0;">
+                    <span style="font-weight: 500;">No Access</span>
+                  </label>
+                  <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; padding: 12px 20px; border: 2px solid #e5e7eb; border-radius: 8px; background: #f9fafb; color: #374151; transition: all 0.2s;" id="userAllProjectsReadAccessLabel">
+                    <input type="radio" name="userAllProjectsAccessLevel" value="read" onchange="setAllProjectsAccessLevel('read')" style="margin: 0;">
+                    <span style="font-weight: 500;">Only Read Access</span>
+                  </label>
+                  <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; padding: 12px 20px; border: 2px solid #e5e7eb; border-radius: 8px; background: #f9fafb; color: #374151; transition: all 0.2s;" id="userAllProjectsFullAccessLabel">
+                    <input type="radio" name="userAllProjectsAccessLevel" value="full" onchange="setAllProjectsAccessLevel('full')" style="margin: 0;">
+                    <span style="font-weight: 500;">Full Access</span>
+                  </label>
+                </div>
+              </div>
+            </div>
+          </div>
           <div id="userFullAccessProjectList" class="full-access-list hidden"></div>
         </div>
       </div>
@@ -651,40 +677,73 @@
         return;
       }
       let a = access.find(ac => ac.user_id === userId && ac.project_id === selectedProjectId) || { read_access: false, write_access: false };
-      let html = `<div style=\"margin-top: 32px; display: flex; flex-direction: column; align-items: center; gap: 40px; padding: 32px 0;\">`;
-      html += `<div style=\"display: flex; gap: 40px; justify-content: center;\">`;
-      html += `<button id=\"readAccessBtn\" class=\"btn btn-primary\" style=\"font-size: 18px; padding: 24px 48px; background: ${a.read_access ? '#7c3aed' : '#e5e7eb'}; color: ${a.read_access ? 'white' : '#374151'}; border: 2px solid #7c3aed;\" onclick=\"toggleAccess('read')\">Read</button>`;
-      html += `<button id=\"writeAccessBtn\" class=\"btn btn-primary\" style=\"font-size: 18px; padding: 24px 48px; background: ${a.write_access ? '#7c3aed' : '#e5e7eb'}; color: ${a.write_access ? 'white' : '#374151'}; border: 2px solid #7c3aed;\" onclick=\"toggleAccess('write')\">Write</button>`;
+      
+      // Determine current access level
+      let accessLevel = 'none';
+      if (a.read_access && a.write_access) {
+        accessLevel = 'full';
+      } else if (a.read_access && !a.write_access) {
+        accessLevel = 'read';
+      }
+      
+      let html = `<div style=\"margin-top: 32px; display: flex; flex-direction: column; align-items: center; gap: 24px; padding: 32px 0;\">`;
+      html += `<div style=\"display: flex; flex-direction: column; gap: 16px; align-items: center;\">`;
+      html += `<div style=\"display: flex; gap: 20px; justify-content: center; flex-wrap: wrap;\">`;
+      
+      // No Access checkbox
+      html += `<label style=\"display: flex; align-items: center; gap: 8px; cursor: pointer; padding: 12px 20px; border: 2px solid #e5e7eb; border-radius: 8px; background: ${accessLevel === 'none' ? '#7c3aed' : '#f9fafb'}; color: ${accessLevel === 'none' ? 'white' : '#374151'}; transition: all 0.2s;\">`;
+      html += `<input type=\"radio\" name=\"accessLevel\" value=\"none\" ${accessLevel === 'none' ? 'checked' : ''} onchange=\"setAccessLevel('none')\" style=\"margin: 0;\">`;
+      html += `<span style=\"font-weight: 500;\">No Access</span>`;
+      html += `</label>`;
+      
+      // Read Only Access checkbox
+      html += `<label style=\"display: flex; align-items: center; gap: 8px; cursor: pointer; padding: 12px 20px; border: 2px solid #e5e7eb; border-radius: 8px; background: ${accessLevel === 'read' ? '#7c3aed' : '#f9fafb'}; color: ${accessLevel === 'read' ? 'white' : '#374151'}; transition: all 0.2s;\">`;
+      html += `<input type=\"radio\" name=\"accessLevel\" value=\"read\" ${accessLevel === 'read' ? 'checked' : ''} onchange=\"setAccessLevel('read')\" style=\"margin: 0;\">`;
+      html += `<span style=\"font-weight: 500;\">Only Read Access</span>`;
+      html += `</label>`;
+      
+      // Full Access checkbox
+      html += `<label style=\"display: flex; align-items: center; gap: 8px; cursor: pointer; padding: 12px 20px; border: 2px solid #e5e7eb; border-radius: 8px; background: ${accessLevel === 'full' ? '#7c3aed' : '#f9fafb'}; color: ${accessLevel === 'full' ? 'white' : '#374151'}; transition: all 0.2s;\">`;
+      html += `<input type=\"radio\" name=\"accessLevel\" value=\"full\" ${accessLevel === 'full' ? 'checked' : ''} onchange=\"setAccessLevel('full')\" style=\"margin: 0;\">`;
+      html += `<span style=\"font-weight: 500;\">Full Access</span>`;
+      html += `</label>`;
+      
+      html += `</div>`;
+      html += `</div>`;
       html += `</div>`;
       accessDiv.innerHTML = html;
       accessDiv.classList.remove('hidden');
     }
 
-    function toggleAccess(type) {
+    function setAccessLevel(level) {
       const userId = parseInt(document.getElementById('userSelectValue').value);
       if (!selectedProjectId || !userId) return;
+      
       let entry = access.find(a => a.user_id === userId && a.project_id === selectedProjectId);
       if (!entry) {
         entry = { user_id: userId, project_id: selectedProjectId, read_access: false, write_access: false };
         access.push(entry);
       }
-      if (type === 'read') {
-        entry.read_access = !entry.read_access;
-        // If read is turned off, also turn off write
-        if (!entry.read_access) entry.write_access = false;
-      } else if (type === 'write') {
-        // Only allow write if read is enabled
-        if (entry.read_access) {
-          entry.write_access = !entry.write_access;
-        } else {
-          // If read is not enabled, enable both
+      
+      // Set access based on level
+      switch(level) {
+        case 'none':
+          entry.read_access = false;
+          entry.write_access = false;
+          break;
+        case 'read':
+          entry.read_access = true;
+          entry.write_access = false;
+          break;
+        case 'full':
           entry.read_access = true;
           entry.write_access = true;
-        }
+          break;
       }
+      
       scheduleSaveAccess();
-      showSelectedProjectAccess();
       showTopNotification('Dostop uspešno shranjen.');
+      showSelectedProjectAccess();
     }
 
     // Show user suggestions as dropdown below the input
@@ -961,39 +1020,74 @@
       let a = access.find(ac => ac.user_id === activeProjectUserId && ac.project_id === projectId) || { read_access: false, write_access: false };
       let user = users.find(u => u.id === activeProjectUserId);
       let project = projects.find(p => p.id === projectId);
-      let html = `<div style=\"margin-top: 32px; padding: 32px 0; display: flex; flex-direction: column; align-items: center; gap: 40px;\">`;
-      html += `<div style=\"display: flex; gap: 40px; justify-content: center;\">`;
-      html += `<button id=\"projectUserReadAccessBtn\" class=\"btn btn-primary\" style=\"font-size: 18px; padding: 24px 48px; background: ${a.read_access ? '#7c3aed' : '#e5e7eb'}; color: ${a.read_access ? 'white' : '#374151'}; border: 2px solid #7c3aed;\" onclick=\"toggleProjectUserAccess('read')\">Read</button>`;
-      html += `<button id=\"projectUserWriteAccessBtn\" class=\"btn btn-primary\" style=\"font-size: 18px; padding: 24px 48px; background: ${a.write_access ? '#7c3aed' : '#e5e7eb'}; color: ${a.write_access ? 'white' : '#374151'}; border: 2px solid #7c3aed;\" onclick=\"toggleProjectUserAccess('write')\">Write</button>`;
+      
+      // Determine current access level
+      let accessLevel = 'none';
+      if (a.read_access && a.write_access) {
+        accessLevel = 'full';
+      } else if (a.read_access && !a.write_access) {
+        accessLevel = 'read';
+      }
+      
+      let html = `<div style=\"margin-top: 32px; padding: 32px 0; display: flex; flex-direction: column; align-items: center; gap: 24px;\">`;
+      html += `<div style=\"display: flex; flex-direction: column; gap: 16px; align-items: center;\">`;
+      html += `<div style=\"display: flex; gap: 20px; justify-content: center; flex-wrap: wrap;\">`;
+      
+      // No Access checkbox
+      html += `<label style=\"display: flex; align-items: center; gap: 8px; cursor: pointer; padding: 12px 20px; border: 2px solid #e5e7eb; border-radius: 8px; background: ${accessLevel === 'none' ? '#7c3aed' : '#f9fafb'}; color: ${accessLevel === 'none' ? 'white' : '#374151'}; transition: all 0.2s;\">`;
+      html += `<input type=\"radio\" name=\"projectUserAccessLevel\" value=\"none\" ${accessLevel === 'none' ? 'checked' : ''} onchange=\"setProjectUserAccessLevel('none')\" style=\"margin: 0;\">`;
+      html += `<span style=\"font-weight: 500;\">No Access</span>`;
+      html += `</label>`;
+      
+      // Read Only Access checkbox
+      html += `<label style=\"display: flex; align-items: center; gap: 8px; cursor: pointer; padding: 12px 20px; border: 2px solid #e5e7eb; border-radius: 8px; background: ${accessLevel === 'read' ? '#7c3aed' : '#f9fafb'}; color: ${accessLevel === 'read' ? 'white' : '#374151'}; transition: all 0.2s;\">`;
+      html += `<input type=\"radio\" name=\"projectUserAccessLevel\" value=\"read\" ${accessLevel === 'read' ? 'checked' : ''} onchange=\"setProjectUserAccessLevel('read')\" style=\"margin: 0;\">`;
+      html += `<span style=\"font-weight: 500;\">Only Read Access</span>`;
+      html += `</label>`;
+      
+      // Full Access checkbox
+      html += `<label style=\"display: flex; align-items: center; gap: 8px; cursor: pointer; padding: 12px 20px; border: 2px solid #e5e7eb; border-radius: 8px; background: ${accessLevel === 'full' ? '#7c3aed' : '#f9fafb'}; color: ${accessLevel === 'full' ? 'white' : '#374151'}; transition: all 0.2s;\">`;
+      html += `<input type=\"radio\" name=\"projectUserAccessLevel\" value=\"full\" ${accessLevel === 'full' ? 'checked' : ''} onchange=\"setProjectUserAccessLevel('full')\" style=\"margin: 0;\">`;
+      html += `<span style=\"font-weight: 500;\">Full Access</span>`;
+      html += `</label>`;
+      
+      html += `</div>`;
       html += `</div>`;
       html += `</div>`;
       cardDiv.innerHTML = html;
       cardDiv.classList.remove('hidden');
     }
 
-    function toggleProjectUserAccess(type) {
+    function setProjectUserAccessLevel(level) {
       const projectId = parseInt(document.getElementById('projectTabSelectValue').value);
       const userId = activeProjectUserId;
       if (!projectId || !userId) return;
+      
       let entry = access.find(a => a.user_id === userId && a.project_id === projectId);
       if (!entry) {
         entry = { user_id: userId, project_id: projectId, read_access: false, write_access: false };
         access.push(entry);
       }
-      if (type === 'read') {
-        entry.read_access = !entry.read_access;
-        if (!entry.read_access) entry.write_access = false;
-      } else if (type === 'write') {
-        if (entry.read_access) {
-          entry.write_access = !entry.write_access;
-        } else {
+      
+      // Set access based on level
+      switch(level) {
+        case 'none':
+          entry.read_access = false;
+          entry.write_access = false;
+          break;
+        case 'read':
+          entry.read_access = true;
+          entry.write_access = false;
+          break;
+        case 'full':
           entry.read_access = true;
           entry.write_access = true;
-        }
+          break;
       }
+      
       scheduleSaveAccess();
-      showProjectUserAccessCard();
       showTopNotification('Dostop uspešno shranjen.');
+      showProjectUserAccessCard();
       loadProjectAccess();
     }
 
@@ -1214,6 +1308,10 @@
       userFilterBtn.addEventListener('click', function(event) {
         event.stopPropagation();
         userFilterDropdown.classList.toggle('hidden');
+        // Remove any forced display style when toggling
+        if (!userFilterDropdown.classList.contains('hidden')) {
+          userFilterDropdown.style.display = '';
+        }
         // Always clear and hide user search and suggestions
         const userSearchInput = document.getElementById('userSearch');
         if (userSearchInput) userSearchInput.value = '';
@@ -1233,10 +1331,35 @@
         if (userProjectSearch) userProjectSearch.value = '';
         const userProjectSuggestions = document.getElementById('userProjectSuggestions');
         if (userProjectSuggestions) userProjectSuggestions.classList.add('hidden');
+        // Close any open customization popups when opening filter
+        const userProjectAccessCard = document.getElementById('userProjectAccessCard');
+        if (userProjectAccessCard) {
+          userProjectAccessCard.classList.add('hidden');
+          userProjectAccessCard.innerHTML = '';
+        }
+        const userAllProjectsAccessCard = document.getElementById('userAllProjectsAccessCard');
+        if (userAllProjectsAccessCard) {
+          userAllProjectsAccessCard.classList.add('hidden');
+        }
       });
       // Hide dropdown when clicking outside
       document.addEventListener('click', function(event) {
-        if (!userFilterDropdown.contains(event.target) && event.target !== userFilterBtn) {
+        // Don't close filter dropdown if clicking on user search field, user project search field, or their suggestions
+        const userSearch = document.getElementById('userSearch');
+        const userSuggestions = document.getElementById('userSuggestions');
+        const userProjectSearch = document.getElementById('userProjectSearch');
+        const userProjectSuggestions = document.getElementById('userProjectSuggestions');
+        const isClickingUserSearch = userSearch && (userSearch.contains(event.target) || userSearch === event.target);
+        const isClickingUserSuggestions = userSuggestions && (userSuggestions.contains(event.target) || userSuggestions === event.target);
+        const isClickingUserProjectSearch = userProjectSearch && (userProjectSearch.contains(event.target) || userProjectSearch === event.target);
+        const isClickingUserProjectSuggestions = userProjectSuggestions && (userProjectSuggestions.contains(event.target) || userProjectSuggestions === event.target);
+        
+        if (!userFilterDropdown.contains(event.target) && 
+            event.target !== userFilterBtn && 
+            !isClickingUserSearch && 
+            !isClickingUserSuggestions &&
+            !isClickingUserProjectSearch &&
+            !isClickingUserProjectSuggestions) {
           userFilterDropdown.classList.add('hidden');
         }
       });
@@ -1266,6 +1389,11 @@
       if (userProjectAccessCard) {
         userProjectAccessCard.classList.add('hidden');
         userProjectAccessCard.innerHTML = '';
+      }
+      // Hide the all projects access card (read/write buttons for all projects)
+      const userAllProjectsAccessCard = document.getElementById('userAllProjectsAccessCard');
+      if (userAllProjectsAccessCard) {
+        userAllProjectsAccessCard.classList.add('hidden');
       }
       // Clear the project search box
       const projectSearch = document.getElementById('projectSearch');
@@ -1367,6 +1495,15 @@
     function showUserProjectSuggestions() {
       const userAccessList = document.getElementById('userFullAccessProjectList');
       if (userAccessList) userAccessList.classList.add('hidden');
+      
+      // Close filter dropdown if open
+      const userFilterDropdown = document.getElementById('userFilterAccessDropdown');
+      if (userFilterDropdown) userFilterDropdown.classList.add('hidden');
+      
+      // Close all projects access card if open
+      const allProjectsAccessCard = document.getElementById('userAllProjectsAccessCard');
+      if (allProjectsAccessCard) allProjectsAccessCard.classList.add('hidden');
+      
       const input = document.getElementById('userProjectSearch');
       const suggestionsDiv = document.getElementById('userProjectSuggestions');
       const search = input.value.toLowerCase();
@@ -1387,9 +1524,42 @@
       suggestionsDiv.classList.remove('hidden');
     }
 
+    // Hide user project suggestions dropdown when input loses focus (with a slight delay to allow click)
+    function hideUserProjectSuggestionsOnBlur() {
+      setTimeout(function() {
+        const suggestionsDiv = document.getElementById('userProjectSuggestions');
+        if (suggestionsDiv) suggestionsDiv.classList.add('hidden');
+      }, 120);
+    }
+    // Attach blur event to userProjectSearch input
+    document.addEventListener('DOMContentLoaded', function() {
+      const userProjectSearch = document.getElementById('userProjectSearch');
+      if (userProjectSearch) {
+        userProjectSearch.addEventListener('blur', hideUserProjectSuggestionsOnBlur);
+      }
+    });
+    // Hide user project suggestions dropdown when clicking outside
+    document.addEventListener('click', function(event) {
+      const userProjectSearch = document.getElementById('userProjectSearch');
+      const userProjectSuggestions = document.getElementById('userProjectSuggestions');
+      if (!userProjectSearch || !userProjectSuggestions) return;
+      if (!userProjectSearch.contains(event.target) && !userProjectSuggestions.contains(event.target)) {
+        userProjectSuggestions.classList.add('hidden');
+      }
+    });
+
     function selectUserProjectFromSuggestion(projectId, projectName) {
       const userAccessList = document.getElementById('userFullAccessProjectList');
       if (userAccessList) userAccessList.classList.add('hidden');
+      
+      // Close filter dropdown if open
+      const userFilterDropdown = document.getElementById('userFilterAccessDropdown');
+      if (userFilterDropdown) userFilterDropdown.classList.add('hidden');
+      
+      // Close all projects access card if open
+      const allProjectsAccessCard = document.getElementById('userAllProjectsAccessCard');
+      if (allProjectsAccessCard) allProjectsAccessCard.classList.add('hidden');
+      
       // Add project to selectedUserProjects if not already present
       if (!selectedUserProjects.includes(projectId)) {
         selectedUserProjects.push(projectId);
@@ -1462,39 +1632,74 @@
       }
       let a = access.find(ac => ac.user_id === userId && ac.project_id === activeUserProjectId) || { read_access: false, write_access: false };
       let project = projects.find(p => p.id === activeUserProjectId);
-      let html = `<div style=\"margin-top: 32px; padding: 32px 0; display: flex; flex-direction: column; align-items: center; gap: 40px;\">`;
-      html += `<div style=\"display: flex; gap: 40px; justify-content: center;\">`;
-      html += `<button id=\"userProjectReadAccessBtn\" class=\"btn btn-primary\" style=\"font-size: 18px; padding: 24px 48px; background: ${a.read_access ? '#7c3aed' : '#e5e7eb'}; color: ${a.read_access ? 'white' : '#374151'}; border: 2px solid #7c3aed;\" onclick=\"toggleUserProjectAccess('read')\">Read</button>`;
-      html += `<button id=\"userProjectWriteAccessBtn\" class=\"btn btn-primary\" style=\"font-size: 18px; padding: 24px 48px; background: ${a.write_access ? '#7c3aed' : '#e5e7eb'}; color: ${a.write_access ? 'white' : '#374151'}; border: 2px solid #7c3aed;\" onclick=\"toggleUserProjectAccess('write')\">Write</button>`;
+      
+      // Determine current access level
+      let accessLevel = 'none';
+      if (a.read_access && a.write_access) {
+        accessLevel = 'full';
+      } else if (a.read_access && !a.write_access) {
+        accessLevel = 'read';
+      }
+      
+      let html = `<div style=\"margin-top: 32px; padding: 32px 0; display: flex; flex-direction: column; align-items: center; gap: 24px;\">`;
+      html += `<div style=\"display: flex; flex-direction: column; gap: 16px; align-items: center;\">`;
+      html += `<div style=\"display: flex; gap: 20px; justify-content: center; flex-wrap: wrap;\">`;
+      
+      // No Access checkbox
+      html += `<label style=\"display: flex; align-items: center; gap: 8px; cursor: pointer; padding: 12px 20px; border: 2px solid #e5e7eb; border-radius: 8px; background: ${accessLevel === 'none' ? '#7c3aed' : '#f9fafb'}; color: ${accessLevel === 'none' ? 'white' : '#374151'}; transition: all 0.2s;\">`;
+      html += `<input type=\"radio\" name=\"userProjectAccessLevel\" value=\"none\" ${accessLevel === 'none' ? 'checked' : ''} onchange=\"setUserProjectAccessLevel('none')\" style=\"margin: 0;\">`;
+      html += `<span style=\"font-weight: 500;\">No Access</span>`;
+      html += `</label>`;
+      
+      // Read Only Access checkbox
+      html += `<label style=\"display: flex; align-items: center; gap: 8px; cursor: pointer; padding: 12px 20px; border: 2px solid #e5e7eb; border-radius: 8px; background: ${accessLevel === 'read' ? '#7c3aed' : '#f9fafb'}; color: ${accessLevel === 'read' ? 'white' : '#374151'}; transition: all 0.2s;\">`;
+      html += `<input type=\"radio\" name=\"userProjectAccessLevel\" value=\"read\" ${accessLevel === 'read' ? 'checked' : ''} onchange=\"setUserProjectAccessLevel('read')\" style=\"margin: 0;\">`;
+      html += `<span style=\"font-weight: 500;\">Only Read Access</span>`;
+      html += `</label>`;
+      
+      // Full Access checkbox
+      html += `<label style=\"display: flex; align-items: center; gap: 8px; cursor: pointer; padding: 12px 20px; border: 2px solid #e5e7eb; border-radius: 8px; background: ${accessLevel === 'full' ? '#7c3aed' : '#f9fafb'}; color: ${accessLevel === 'full' ? 'white' : '#374151'}; transition: all 0.2s;\">`;
+      html += `<input type=\"radio\" name=\"userProjectAccessLevel\" value=\"full\" ${accessLevel === 'full' ? 'checked' : ''} onchange=\"setUserProjectAccessLevel('full')\" style=\"margin: 0;\">`;
+      html += `<span style=\"font-weight: 500;\">Full Access</span>`;
+      html += `</label>`;
+      
+      html += `</div>`;
       html += `</div>`;
       html += `</div>`;
       cardDiv.innerHTML = html;
       cardDiv.classList.remove('hidden');
     }
 
-    function toggleUserProjectAccess(type) {
+    function setUserProjectAccessLevel(level) {
       const userId = parseInt(document.getElementById('userSelectValue').value);
       const projectId = activeUserProjectId;
       if (!projectId || !userId) return;
+      
       let entry = access.find(a => a.user_id === userId && a.project_id === projectId);
       if (!entry) {
         entry = { user_id: userId, project_id: projectId, read_access: false, write_access: false };
         access.push(entry);
       }
-      if (type === 'read') {
-        entry.read_access = !entry.read_access;
-        if (!entry.read_access) entry.write_access = false;
-      } else if (type === 'write') {
-        if (entry.read_access) {
-          entry.write_access = !entry.write_access;
-        } else {
+      
+      // Set access based on level
+      switch(level) {
+        case 'none':
+          entry.read_access = false;
+          entry.write_access = false;
+          break;
+        case 'read':
+          entry.read_access = true;
+          entry.write_access = false;
+          break;
+        case 'full':
           entry.read_access = true;
           entry.write_access = true;
-        }
+          break;
       }
+      
       scheduleSaveAccess();
-      showUserProjectAccessCard();
       showTopNotification('Dostop uspešno shranjen.');
+      showUserProjectAccessCard();
     }
 
     // --- Persistence to backend ---
@@ -1519,6 +1724,210 @@
           : 'http://localhost:3000/add_app2.html';
         alert('Napaka pri shranjevanju dostopa. Zaženite strežnik in odprite stran prek ' + originHint);
       }
+    }
+
+    // --- FUNCTION TO CLOSE ALL POPUPS AND DROPDOWNS ---
+    function closeAllPopups() {
+      // Close user filter dropdown
+      const userFilterDropdown = document.getElementById('userFilterAccessDropdown');
+      if (userFilterDropdown) {
+        userFilterDropdown.classList.add('hidden');
+        userFilterDropdown.style.display = 'none';
+      }
+      
+      // Close project filter dropdown
+      const filterDropdown = document.getElementById('filterAccessDropdown');
+      if (filterDropdown) {
+        filterDropdown.classList.add('hidden');
+      }
+      
+      // Close user suggestions dropdown
+      const userSuggestions = document.getElementById('userSuggestions');
+      if (userSuggestions) {
+        userSuggestions.classList.add('hidden');
+      }
+      
+      // Close user project suggestions dropdown
+      const userProjectSuggestions = document.getElementById('userProjectSuggestions');
+      if (userProjectSuggestions) {
+        userProjectSuggestions.classList.add('hidden');
+      }
+      
+      // Close project tab suggestions dropdown
+      const projectTabSuggestions = document.getElementById('projectTabSuggestions');
+      if (projectTabSuggestions) {
+        projectTabSuggestions.classList.add('hidden');
+      }
+      
+      // Close project user suggestions dropdown
+      const projectUserSuggestions = document.getElementById('projectUserSuggestions');
+      if (projectUserSuggestions) {
+        projectUserSuggestions.classList.add('hidden');
+      }
+      
+      // Close project suggestions dropdown
+      const projectSuggestions = document.getElementById('projectSuggestions');
+      if (projectSuggestions) {
+        projectSuggestions.classList.add('hidden');
+      }
+      
+      // Hide full access lists
+      const userFullAccessProjectList = document.getElementById('userFullAccessProjectList');
+      if (userFullAccessProjectList) {
+        userFullAccessProjectList.classList.add('hidden');
+      }
+      
+      const fullAccessUserList = document.getElementById('fullAccessUserList');
+      if (fullAccessUserList) {
+        fullAccessUserList.classList.add('hidden');
+      }
+      
+      // Close any project access cards
+      const userProjectAccessCard = document.getElementById('userProjectAccessCard');
+      if (userProjectAccessCard) {
+        userProjectAccessCard.classList.add('hidden');
+        userProjectAccessCard.innerHTML = '';
+      }
+      
+      const projectUserAccessCard = document.getElementById('projectUserAccessCard');
+      if (projectUserAccessCard) {
+        projectUserAccessCard.classList.add('hidden');
+        projectUserAccessCard.innerHTML = '';
+      }
+      
+      // Close selected project access div
+      const selectedProjectAccess = document.getElementById('selectedProjectAccess');
+      if (selectedProjectAccess) {
+        selectedProjectAccess.classList.add('hidden');
+        selectedProjectAccess.innerHTML = '';
+      }
+    }
+
+    // --- MULTI PROJECT ACCESS LOGIC FOR ALL PROJECTS ---
+    function toggleAllProjectsAccess() {
+      const userId = parseInt(document.getElementById('userSelectValue').value);
+      if (!userId) return;
+
+      const accessCard = document.getElementById('userAllProjectsAccessCard');
+      
+      // Close ALL possible popups and dropdowns when button is clicked
+      closeAllPopups();
+      
+      // Toggle visibility
+      accessCard.classList.toggle('hidden');
+      if (!accessCard.classList.contains('hidden')) {
+        // Close individual project customization if open
+        const userProjectAccessCard = document.getElementById('userProjectAccessCard');
+        if (userProjectAccessCard) {
+          userProjectAccessCard.classList.add('hidden');
+          userProjectAccessCard.innerHTML = '';
+        }
+        
+        // Clear individual project selection
+        selectedUserProjects = [];
+        activeUserProjectId = null;
+        updateUserProjectChips();
+        
+        // Clear project search
+        const userProjectSearch = document.getElementById('userProjectSearch');
+        if (userProjectSearch) userProjectSearch.value = '';
+        const userProjectSuggestions = document.getElementById('userProjectSuggestions');
+        if (userProjectSuggestions) userProjectSuggestions.classList.add('hidden');
+        
+        updateAllProjectsAccessButtons();
+      }
+    }
+
+    function setAllProjectsAccessLevel(level) {
+      const userId = parseInt(document.getElementById('userSelectValue').value);
+      if (!userId) return;
+
+      // Close all popups when using all projects customization
+      closeAllPopups();
+      
+      // Handle access changes for all projects
+      projects.forEach(project => {
+        let entry = access.find(a => a.user_id === userId && a.project_id === project.id);
+        if (!entry) {
+          entry = { user_id: userId, project_id: project.id, read_access: false, write_access: false };
+          access.push(entry);
+        }
+        
+        // Set access based on level
+        switch(level) {
+          case 'none':
+            entry.read_access = false;
+            entry.write_access = false;
+            break;
+          case 'read':
+            entry.read_access = true;
+            entry.write_access = false;
+            break;
+          case 'full':
+            entry.read_access = true;
+            entry.write_access = true;
+            break;
+        }
+      });
+      
+      scheduleSaveAccess();
+      showTopNotification('Dostop uspešno shranjen.');
+      updateAllProjectsAccessButtons();
+    }
+
+    function updateAllProjectsAccessButtons() {
+      const userId = parseInt(document.getElementById('userSelectValue').value);
+      if (!userId) return;
+
+      const noAccessLabel = document.getElementById('userAllProjectsNoAccessLabel');
+      const readAccessLabel = document.getElementById('userAllProjectsReadAccessLabel');
+      const fullAccessLabel = document.getElementById('userAllProjectsFullAccessLabel');
+      
+      // Check if user has access to all projects
+      const allProjects = projects.map(p => p.id);
+      const userAccess = access.filter(a => a.user_id === userId && allProjects.includes(a.project_id));
+      
+      const hasReadAccess = userAccess.length > 0 && userAccess.every(a => a.read_access);
+      const hasWriteAccess = userAccess.length > 0 && userAccess.every(a => a.write_access);
+      
+      // Determine current access level
+      let accessLevel = 'none';
+      if (hasReadAccess && hasWriteAccess) {
+        accessLevel = 'full';
+      } else if (hasReadAccess && !hasWriteAccess) {
+        accessLevel = 'read';
+      }
+      
+      // Update radio button selection
+      const noAccessRadio = noAccessLabel.querySelector('input[type="radio"]');
+      const readAccessRadio = readAccessLabel.querySelector('input[type="radio"]');
+      const fullAccessRadio = fullAccessLabel.querySelector('input[type="radio"]');
+      
+      noAccessRadio.checked = (accessLevel === 'none');
+      readAccessRadio.checked = (accessLevel === 'read');
+      fullAccessRadio.checked = (accessLevel === 'full');
+      
+      // Update label styling
+      noAccessLabel.style.background = (accessLevel === 'none') ? '#7c3aed' : '#f9fafb';
+      noAccessLabel.style.color = (accessLevel === 'none') ? 'white' : '#374151';
+      
+      readAccessLabel.style.background = (accessLevel === 'read') ? '#7c3aed' : '#f9fafb';
+      readAccessLabel.style.color = (accessLevel === 'read') ? 'white' : '#374151';
+      
+      fullAccessLabel.style.background = (accessLevel === 'full') ? '#7c3aed' : '#f9fafb';
+      fullAccessLabel.style.color = (accessLevel === 'full') ? 'white' : '#374151';
+    }
+
+    function removeAllProjectsAccess() {
+      const userId = parseInt(document.getElementById('userSelectValue').value);
+      if (!userId) return;
+
+      // Remove all access entries for this user across all projects
+      access = access.filter(a => a.user_id !== userId);
+      
+      scheduleSaveAccess();
+      showTopNotification('Celoten dostop uspešno odstranjen.');
+      updateAllProjectsAccessButtons();
     }
   </script>
 </body>
