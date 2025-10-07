@@ -465,7 +465,7 @@
       <div class="card">
         <h2 class="card-title">Izberi uporabnika:</h2>
         <div class="form-group" style="position: relative;">
-          <input type="text" id="userSearch" class="form-select" placeholder="Vpiši ime uporabnika..." autocomplete="off" oninput="showUserSuggestions()" onclick="showUserSuggestions()" onfocus="showUserSuggestions()" style="margin-bottom: 0;">
+          <input type="text" id="userSearch" class="form-select" placeholder="Vpiši email uporabnika..." autocomplete="off" oninput="showUserSuggestions()" onclick="showUserSuggestions()" onfocus="showUserSuggestions()" style="margin-bottom: 0;">
           <div id="userSuggestions" class="search-results hidden"></div>
         </div>
       </div>
@@ -488,16 +488,13 @@
           <!-- Iskanje projektov -->
           <div class="form-group" style="position: relative;">
             <label for="userProjectSearch" class="form-label">Pregled in upravljanje dostopa do posameznih projektov:</label>
-            <div style="position: relative; display: flex; align-items: center; flex-wrap: wrap; gap: 6px; min-height: 48px; background: #fff; border-radius: 8px; border: 1px solid #d1d5db; padding: 4px 8px;">
-              <div id="userProjectChips" style="display: flex; align-items: center; flex-wrap: wrap; gap: 6px;"></div>
-              <input type="text" id="userProjectSearch" class="form-select" placeholder="Vpiši ime projekta..." autocomplete="off" oninput="showUserProjectSuggestions()" onclick="showUserProjectSuggestions()" style="flex:1; min-width: 120px; border: none; box-shadow: none; outline: none; padding: 8px 0; background: transparent;">
-            </div>
+            <input type="text" id="userProjectSearch" class="form-select" placeholder="Vpiši ime projekta..." autocomplete="off" oninput="showUserProjectSuggestions()" onclick="showProjectSuggestionsOnClick()" onfocus="showUserProjectSuggestions()" style="margin-bottom: 0;">
             <div id="userProjectSuggestions" class="search-results hidden"></div>
             <input type="hidden" id="userProjectSelectValue">
           </div>
           <div id="userProjectAccessCard" class="form-group hidden"></div>
           <div class="form-group" style="margin-top: 28px;">
-            <button id="userAllProjectsBtn" type="button" style="width: 100%; display: flex; align-items: center; background: #fff; border: 1px solid #d1d5db; border-radius: 8px; padding: 4px 8px; min-height: 48px; font-family: inherit; font-size: 14px; line-height: 20px; letter-spacing: normal; text-transform: none; font-weight: 500; color: #374151; cursor: pointer;" onclick="toggleAllProjectsAccess()">
+            <button id="userAllProjectsBtn" type="button" style="width: 100%; display: flex; align-items: center; justify-content: center; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; border-radius: 10px; padding: 12px 20px; min-height: 44px; font-family: inherit; font-size: 14px; font-weight: 600; color: white; cursor: pointer; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3); transition: all 0.3s ease; text-transform: none; letter-spacing: 0.3px;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 20px rgba(102, 126, 234, 0.5)'; this.style.background='linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 15px rgba(102, 126, 234, 0.3)'; this.style.background='linear-gradient(135deg, #667eea 0%, #764ba2 100%)'" onclick="toggleAllProjectsAccess()">
               Upravljanje dostopa do vseh projektov
             </button>
           </div>
@@ -517,11 +514,11 @@
                     <input type="radio" name="userAllProjectsAccessLevel" value="full" onchange="setAllProjectsAccessLevel('full')" style="margin: 0;">
                     <span style="font-weight: 500;">Full Access</span>
                   </label>
-                </div>
+            </div>
               </div>
             </div>
           </div>
-          <div id="userFullAccessProjectList" class="full-access-list hidden"></div>
+          <div id="userFullAccessProjectList" class="full-access-list hidden" style="max-height: 400px; overflow-y: auto; border: 1px solid #e5e7eb; border-radius: 8px; background: #fff;"></div>
         </div>
       </div>
     </div>
@@ -543,31 +540,25 @@
       </div>
 
       <div id="projectAccessSection" class="hidden">
-        <div class="card" style="position: relative;">
-          <div id="projectDetails" class="user-details">
-            <!-- Podrobnosti o projektu bodo prikazane tukaj -->
+        <div class="card">
+          <!-- User List Section -->
+          <div id="projectUsersList" class="form-group">
+            <h3 class="form-label" style="margin-bottom: 16px;">Dostop uporabnikov do projekta:</h3>
+            <div class="form-group" style="margin-bottom: 12px;">
+              <input type="text" id="userListSearch" class="form-select" placeholder="Išči uporabnika po email..." autocomplete="off" oninput="filterUserList()" style="margin-bottom: 0;">
           </div>
-          <button id="filterAccessBtn" style="position: absolute; top: 28px; right: 28px; width: 32px; height: 32px; background: none; border: none; padding: 0; cursor: pointer; z-index: 10; display: flex; align-items: center; justify-content: center;" aria-label="Filter access options">
-            <svg style="width: 28px; height: 28px; color: #7c3aed;" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-              <path d="M4 4h16l-6.5 8.5v5a1.5 1.5 0 0 1-3 0v-5L4 4z"/>
-            </svg>
-          </button>
-          <div id="filterAccessDropdown" class="filter-dropdown hidden">
-            <div class="filter-dropdown-option" onclick="selectAccessFilter('full')">Poln dostop</div>
-            <div class="filter-dropdown-option" onclick="selectAccessFilter('read')">Samo read dostop</div>
-            <div class="filter-dropdown-option" onclick="selectAccessFilter('none')">Brez dostopa</div>
+            <div class="form-group" style="margin-bottom: 12px;">
+              <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                <button id="filterAllUsers" class="btn btn-primary" onclick="setUserListFilter('all')" style="font-size: 12px; padding: 6px 12px; background: #7c3aed; color: white; border: none; border-radius: 6px; cursor: pointer;">Vsi</button>
+                <button id="filterNoAccessUsers" class="btn btn-primary" onclick="setUserListFilter('none')" style="font-size: 12px; padding: 6px 12px; background: #e5e7eb; color: #374151; border: none; border-radius: 6px; cursor: pointer;">Brez dostopa</button>
+                <button id="filterReadUsers" class="btn btn-primary" onclick="setUserListFilter('read')" style="font-size: 12px; padding: 6px 12px; background: #e5e7eb; color: #374151; border: none; border-radius: 6px; cursor: pointer;">Samo read</button>
+                <button id="filterFullAccessUsers" class="btn btn-primary" onclick="setUserListFilter('full')" style="font-size: 12px; padding: 6px 12px; background: #e5e7eb; color: #374151; border: none; border-radius: 6px; cursor: pointer;">Poln dostop</button>
           </div>
-          <div class="form-group" style="position: relative; margin-top: 24px;">
-            <label for="projectUserSearch" class="form-label">Pregled in upravljanje dostopa uporabnikov:</label>
-            <div style="position: relative; display: flex; align-items: center; flex-wrap: wrap; gap: 6px; min-height: 48px; background: #fff; border-radius: 8px; border: 1px solid #d1d5db; padding: 4px 8px;">
-              <div id="projectUserChips" style="display: flex; align-items: center; flex-wrap: wrap; gap: 6px;"></div>
-              <input type="text" id="projectUserSearch" class="form-select" placeholder="Vpiši ime uporabnika..." autocomplete="off" oninput="showProjectUserSuggestions()" onclick="showProjectUserSuggestions()" style="flex:1; min-width: 120px; border: none; box-shadow: none; outline: none; padding: 8px 0; background: transparent;">
             </div>
-            <div id="projectUserSuggestions" class="search-results hidden"></div>
-            <input type="hidden" id="projectUserSelectValue">
+            <div id="usersListContainer" style="max-height: 400px; overflow-y: auto; border: 1px solid #e5e7eb; border-radius: 8px; background: #fff;">
+              <!-- Users will be displayed here -->
           </div>
-          <div id="fullAccessUserList" class="full-access-list hidden"></div>
-          <div id="projectUserAccessCard" class="form-group hidden"></div>
+          </div>
         </div>
       </div>
     </div>
@@ -626,8 +617,6 @@
 
     let selectedProjectId = null;
     let selectedProjectName = null;
-    let selectedProjectUsers = [];
-    let activeProjectUserId = null;
 
     // Project autocomplete dropdown logic
     function showProjectSuggestions() {
@@ -739,7 +728,7 @@
           entry.read_access = true;
           entry.write_access = true;
           break;
-      }
+        }
       
       scheduleSaveAccess();
       showTopNotification('Dostop uspešno shranjen.');
@@ -752,7 +741,7 @@
       const suggestionsDiv = document.getElementById('userSuggestions');
       const search = input.value.toLowerCase();
       suggestionsDiv.innerHTML = '';
-      const filtered = users.filter(u => u.name.toLowerCase().includes(search));
+      const filtered = users.filter(u => u.email.toLowerCase().includes(search));
       if (filtered.length === 0) {
         suggestionsDiv.classList.add('hidden');
         // Hide filter results when typing
@@ -763,8 +752,8 @@
       filtered.forEach(u => {
         const item = document.createElement('div');
         item.className = 'search-result-item';
-        item.textContent = u.name;
-        item.onclick = () => selectUserFromSuggestion(u.id, u.name);
+        item.textContent = u.email;
+        item.onclick = () => selectUserFromSuggestion(u.id, u.email);
         suggestionsDiv.appendChild(item);
       });
       suggestionsDiv.classList.remove('hidden');
@@ -773,8 +762,8 @@
       if (userAccessList) userAccessList.classList.add('hidden');
     }
 
-    function selectUserFromSuggestion(userId, userName) {
-      document.getElementById('userSearch').value = userName;
+    function selectUserFromSuggestion(userId, userEmail) {
+      document.getElementById('userSearch').value = userEmail;
       document.getElementById('userSuggestions').classList.add('hidden');
       // Hide filter results when selecting a user
       const userAccessList = document.getElementById('userFullAccessProjectList');
@@ -819,10 +808,10 @@
       const userId = parseInt(document.getElementById('userSelectValue').value);
       const section = document.getElementById('userAccessSection');
       const userDetails = document.getElementById('userDetails');
-      // Reset project chips and access card for new user
+      // Reset project selection and access card for new user
       selectedUserProjects = [];
       activeUserProjectId = null;
-      updateUserProjectChips();
+      document.getElementById('userProjectSearch').value = '';
       showUserProjectAccessCard();
       // Hide legacy single project UI if present
       if (document.getElementById('selectedProjectAccess')) {
@@ -839,10 +828,10 @@
       const user = users.find(u => u.id === userId);
       if (user) {
         userDetails.innerHTML = `
-          <div class="user-avatar">${user.name.charAt(0)}</div>
+          <div class="user-avatar">${user.email.charAt(0)}</div>
           <div class="user-info">
-            <h3>${user.name}</h3>
-            <p>${user.email || 'Ni e-pošte'}</p>
+            <h3>${user.email}</h3>
+            <p>ID: ${user.id}</p>
           </div>
         `;
       }
@@ -895,174 +884,186 @@
     }
 
     // NEW: User search for selected project
-    function showProjectUserSuggestions() {
-      const input = document.getElementById('projectUserSearch');
-      const suggestionsDiv = document.getElementById('projectUserSuggestions');
-      const search = input.value.toLowerCase();
-      suggestionsDiv.innerHTML = '';
-      // Only show users not already selected
-      const filtered = users.filter(u => u.name.toLowerCase().includes(search) && !selectedProjectUsers.includes(u.id));
-      if (filtered.length === 0) {
-        suggestionsDiv.classList.add('hidden');
-        return;
-      }
-      filtered.forEach(u => {
-        const item = document.createElement('div');
-        item.className = 'search-result-item';
-        item.textContent = u.name;
-        item.onclick = () => selectProjectUserFromSuggestion(u.id, u.name);
-        suggestionsDiv.appendChild(item);
-      });
-      suggestionsDiv.classList.remove('hidden');
-      // Hide filter results when typing
-      const listDiv = document.getElementById('fullAccessUserList');
-      if (listDiv) listDiv.classList.add('hidden');
-    }
 
-    // Hide project user suggestions dropdown when input loses focus (with a slight delay to allow click)
-    function hideProjectUserSuggestionsOnBlur() {
-      setTimeout(function() {
-        const suggestionsDiv = document.getElementById('projectUserSuggestions');
-        if (suggestionsDiv) suggestionsDiv.classList.add('hidden');
-      }, 120);
-    }
-    // Attach blur event to projectUserSearch input
-    document.addEventListener('DOMContentLoaded', function() {
-      const projectUserSearch = document.getElementById('projectUserSearch');
-      if (projectUserSearch) {
-        projectUserSearch.addEventListener('blur', hideProjectUserSuggestionsOnBlur);
-      }
-    });
-    // Hide project user suggestions dropdown when clicking outside
+
+
+
+
+
+
+    // Hide project tab suggestions dropdown when clicking outside
     document.addEventListener('click', function(event) {
-      const projectUserSearch = document.getElementById('projectUserSearch');
-      const projectUserSuggestions = document.getElementById('projectUserSuggestions');
-      if (!projectUserSearch || !projectUserSuggestions) return;
-      if (!projectUserSearch.contains(event.target) && !projectUserSuggestions.contains(event.target)) {
-        projectUserSuggestions.classList.add('hidden');
+      const projectTabSearch = document.getElementById('projectTabSearch');
+      const projectTabSuggestions = document.getElementById('projectTabSuggestions');
+      if (!projectTabSearch || !projectTabSuggestions) return;
+      if (!projectTabSearch.contains(event.target) && !projectTabSuggestions.contains(event.target)) {
+        projectTabSuggestions.classList.add('hidden');
       }
     });
 
-    function selectProjectUserFromSuggestion(userId, userName) {
-      // Add user to selectedProjectUsers if not already present
-      if (!selectedProjectUsers.includes(userId)) {
-        selectedProjectUsers.push(userId);
-      }
-      activeProjectUserId = userId;
-      document.getElementById('projectUserSearch').value = '';
-      document.getElementById('projectUserSuggestions').classList.add('hidden');
-      updateProjectUserChips();
-      showProjectUserAccessCard();
-      // Hide filter results when a user is selected
-      const listDiv = document.getElementById('fullAccessUserList');
-      if (listDiv) listDiv.classList.add('hidden');
+    function loadProjectAccess() {
+      const projectId = parseInt(document.getElementById('projectTabSelectValue').value);
+      const section = document.getElementById('projectAccessSection');
+      if (!projectId) return section.classList.add('hidden');
+      
+      // Show all users with their access status
+      showProjectUsersList(projectId);
+      
+      // Always show the section
+      section.classList.remove('hidden');
     }
 
-    function updateProjectUserChips() {
-      const chipsDiv = document.getElementById('projectUserChips');
-      chipsDiv.innerHTML = '';
-      selectedProjectUsers.forEach(userId => {
-        const user = users.find(u => u.id === userId);
-        if (!user) return;
-        const chip = document.createElement('div');
-        chip.style.display = 'flex';
-        chip.style.alignItems = 'center';
-        chip.style.background = activeProjectUserId === userId ? '#ede9fe' : '#f3f4f6';
-        chip.style.color = '#374151';
-        chip.style.borderRadius = '16px';
-        chip.style.padding = '4px 10px 4px 10px';
-        chip.style.fontSize = '15px';
-        chip.style.marginRight = '2px';
-        chip.style.cursor = 'pointer';
-        chip.style.border = activeProjectUserId === userId ? '1.5px solid #7c3aed' : '1px solid #d1d5db';
-        chip.textContent = user.name;
-        chip.onclick = function(e) {
-          e.stopPropagation();
-          activeProjectUserId = userId;
-          updateProjectUserChips();
-          showProjectUserAccessCard();
-        };
-        // Add x button
-        const xBtn = document.createElement('span');
-        xBtn.textContent = '×';
-        xBtn.style.marginLeft = '8px';
-        xBtn.style.fontWeight = 'bold';
-        xBtn.style.cursor = 'pointer';
-        xBtn.onclick = function(e) {
-          e.stopPropagation();
-          // Remove user from selectedProjectUsers
-          selectedProjectUsers = selectedProjectUsers.filter(id => id !== userId);
-          // If removed user was active, pick another or clear
-          if (activeProjectUserId === userId) {
-            activeProjectUserId = selectedProjectUsers.length > 0 ? selectedProjectUsers[0] : null;
+    // Store current project users globally for filtering
+    let currentProjectUsers = [];
+    let currentProjectId = null;
+    let currentUserListFilter = 'all'; // 'all', 'none', 'read', 'full'
+
+    function showProjectUsersList(projectId) {
+      const container = document.getElementById('usersListContainer');
+      if (!container) return;
+
+      currentProjectId = projectId;
+      currentProjectUsers = users; // Store all users for filtering
+      currentUserListFilter = 'all'; // Reset filter to 'all'
+      
+      updateFilterButtons();
+      renderUserList();
+    }
+
+    function renderUserList() {
+      const container = document.getElementById('usersListContainer');
+      if (!container) return;
+
+      const searchInput = document.getElementById('userListSearch');
+      const searchTerm = searchInput ? searchInput.value.toLowerCase() : '';
+      
+      // Filter users based on search term and access level
+      let filteredUsers = currentProjectUsers.filter(user => 
+        user.email.toLowerCase().includes(searchTerm)
+      );
+
+      // Apply access level filter
+      if (currentUserListFilter !== 'all') {
+        filteredUsers = filteredUsers.filter(user => {
+          const userAccess = access.find(a => a.user_id === user.id && a.project_id === currentProjectId);
+          
+          if (currentUserListFilter === 'none') {
+            return !userAccess || (!userAccess.read_access && !userAccess.write_access);
+          } else if (currentUserListFilter === 'read') {
+            return userAccess && userAccess.read_access && !userAccess.write_access;
+          } else if (currentUserListFilter === 'full') {
+            return userAccess && userAccess.read_access && userAccess.write_access;
           }
-          updateProjectUserChips();
-          showProjectUserAccessCard();
-        };
-        chip.appendChild(xBtn);
-        chipsDiv.appendChild(chip);
+          return true;
+        });
+      }
+
+      let html = '';
+      
+      // Get all filtered users and their access status for this project
+      filteredUsers.forEach(user => {
+        const userAccess = access.find(a => a.user_id === user.id && a.project_id === currentProjectId);
+        
+        // Determine current access level
+        let accessLevel = 'none';
+        if (userAccess) {
+          if (userAccess.read_access && userAccess.write_access) {
+            accessLevel = 'full';
+          } else if (userAccess.read_access && !userAccess.write_access) {
+            accessLevel = 'read';
+          }
+        }
+        
+        html += `
+          <div style="display: flex; align-items: center; justify-content: space-between; padding: 8px 12px; border-bottom: 1px solid #f3f4f6; transition: background-color 0.2s;" 
+               onmouseover="this.style.backgroundColor='#f9fafb'" 
+               onmouseout="this.style.backgroundColor='transparent'">
+            <div style="display: flex; align-items: center; gap: 8px;">
+              <div style="width: 32px; height: 32px; background: #7c3aed; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 600; font-size: 14px;">
+                ${user.email.charAt(0).toUpperCase()}
+          </div>
+              <div>
+                <div style="font-weight: 600; color: #1f2937; font-size: 14px;">${user.email}</div>
+                <div style="color: #6b7280; font-size: 12px;">ID: ${user.id}</div>
+              </div>
+            </div>
+            <div style="display: flex; gap: 16px; align-items: center;">
+              <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; padding: 4px 8px; border-radius: 4px; background: ${accessLevel === 'none' ? 'rgba(124, 58, 237, 0.1)' : 'transparent'}; color: ${accessLevel === 'none' ? '#7c3aed' : '#6b7280'}; transition: all 0.2s; font-size: 13px; font-weight: ${accessLevel === 'none' ? '600' : '400'};">
+                <input type="radio" name="userAccess_${user.id}" value="none" ${accessLevel === 'none' ? 'checked' : ''} onchange="updateUserProjectAccess(${user.id}, ${currentProjectId}, 'none')" style="margin: 0; width: 14px; height: 14px;">
+                <span>No Access</span>
+              </label>
+              <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; padding: 4px 8px; border-radius: 4px; background: ${accessLevel === 'read' ? 'rgba(124, 58, 237, 0.1)' : 'transparent'}; color: ${accessLevel === 'read' ? '#7c3aed' : '#6b7280'}; transition: all 0.2s; font-size: 13px; font-weight: ${accessLevel === 'read' ? '600' : '400'};">
+                <input type="radio" name="userAccess_${user.id}" value="read" ${accessLevel === 'read' ? 'checked' : ''} onchange="updateUserProjectAccess(${user.id}, ${currentProjectId}, 'read')" style="margin: 0; width: 14px; height: 14px;">
+                <span>Read Only</span>
+              </label>
+              <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; padding: 4px 8px; border-radius: 4px; background: ${accessLevel === 'full' ? 'rgba(124, 58, 237, 0.1)' : 'transparent'}; color: ${accessLevel === 'full' ? '#7c3aed' : '#6b7280'}; transition: all 0.2s; font-size: 13px; font-weight: ${accessLevel === 'full' ? '600' : '400'};">
+                <input type="radio" name="userAccess_${user.id}" value="full" ${accessLevel === 'full' ? 'checked' : ''} onchange="updateUserProjectAccess(${user.id}, ${currentProjectId}, 'full')" style="margin: 0; width: 14px; height: 14px;">
+                <span>Full Access</span>
+              </label>
+            </div>
+          </div>
+        `;
       });
-      // Set placeholder based on number of selected users
-      const projectUserSearch = document.getElementById('projectUserSearch');
-      if (projectUserSearch) {
-        projectUserSearch.placeholder = selectedProjectUsers.length > 0 ? '' : 'Vpiši ime uporabnika...';
+      
+      // Show message if no users found
+      if (filteredUsers.length === 0) {
+        let message = '';
+        if (searchTerm) {
+          message = 'Iskanje ni vrnilo rezultatov';
+        } else if (currentUserListFilter === 'none') {
+          message = 'Ni uporabnikov brez dostopa';
+        } else if (currentUserListFilter === 'read') {
+          message = 'Ni uporabnikov s samo read dostopom';
+        } else if (currentUserListFilter === 'full') {
+          message = 'Ni uporabnikov s polnim dostopom';
+        } else {
+          message = 'Ni uporabnikov v sistemu';
+        }
+        
+        html = `
+          <div style="padding: 32px; text-align: center; color: #6b7280;">
+            <div style="font-size: 16px; margin-bottom: 8px;">Ni uporabnikov</div>
+            <div style="font-size: 14px;">${message}</div>
+          </div>
+        `;
       }
+      
+      container.innerHTML = html;
     }
 
-    function showProjectUserAccessCard() {
-      const projectId = parseInt(document.getElementById('projectTabSelectValue').value);
-      const cardDiv = document.getElementById('projectUserAccessCard');
-      if (!projectId || !activeProjectUserId) {
-        cardDiv.classList.add('hidden');
-        cardDiv.innerHTML = '';
-        return;
-      }
-      let a = access.find(ac => ac.user_id === activeProjectUserId && ac.project_id === projectId) || { read_access: false, write_access: false };
-      let user = users.find(u => u.id === activeProjectUserId);
-      let project = projects.find(p => p.id === projectId);
-      
-      // Determine current access level
-      let accessLevel = 'none';
-      if (a.read_access && a.write_access) {
-        accessLevel = 'full';
-      } else if (a.read_access && !a.write_access) {
-        accessLevel = 'read';
-      }
-      
-      let html = `<div style=\"margin-top: 32px; padding: 32px 0; display: flex; flex-direction: column; align-items: center; gap: 24px;\">`;
-      html += `<div style=\"display: flex; flex-direction: column; gap: 16px; align-items: center;\">`;
-      html += `<div style=\"display: flex; gap: 20px; justify-content: center; flex-wrap: wrap;\">`;
-      
-      // No Access checkbox
-      html += `<label style=\"display: flex; align-items: center; gap: 8px; cursor: pointer; padding: 12px 20px; border: 2px solid #e5e7eb; border-radius: 8px; background: ${accessLevel === 'none' ? '#7c3aed' : '#f9fafb'}; color: ${accessLevel === 'none' ? 'white' : '#374151'}; transition: all 0.2s;\">`;
-      html += `<input type=\"radio\" name=\"projectUserAccessLevel\" value=\"none\" ${accessLevel === 'none' ? 'checked' : ''} onchange=\"setProjectUserAccessLevel('none')\" style=\"margin: 0;\">`;
-      html += `<span style=\"font-weight: 500;\">No Access</span>`;
-      html += `</label>`;
-      
-      // Read Only Access checkbox
-      html += `<label style=\"display: flex; align-items: center; gap: 8px; cursor: pointer; padding: 12px 20px; border: 2px solid #e5e7eb; border-radius: 8px; background: ${accessLevel === 'read' ? '#7c3aed' : '#f9fafb'}; color: ${accessLevel === 'read' ? 'white' : '#374151'}; transition: all 0.2s;\">`;
-      html += `<input type=\"radio\" name=\"projectUserAccessLevel\" value=\"read\" ${accessLevel === 'read' ? 'checked' : ''} onchange=\"setProjectUserAccessLevel('read')\" style=\"margin: 0;\">`;
-      html += `<span style=\"font-weight: 500;\">Only Read Access</span>`;
-      html += `</label>`;
-      
-      // Full Access checkbox
-      html += `<label style=\"display: flex; align-items: center; gap: 8px; cursor: pointer; padding: 12px 20px; border: 2px solid #e5e7eb; border-radius: 8px; background: ${accessLevel === 'full' ? '#7c3aed' : '#f9fafb'}; color: ${accessLevel === 'full' ? 'white' : '#374151'}; transition: all 0.2s;\">`;
-      html += `<input type=\"radio\" name=\"projectUserAccessLevel\" value=\"full\" ${accessLevel === 'full' ? 'checked' : ''} onchange=\"setProjectUserAccessLevel('full')\" style=\"margin: 0;\">`;
-      html += `<span style=\"font-weight: 500;\">Full Access</span>`;
-      html += `</label>`;
-      
-      html += `</div>`;
-      html += `</div>`;
-      html += `</div>`;
-      cardDiv.innerHTML = html;
-      cardDiv.classList.remove('hidden');
+    function filterUserList() {
+      renderUserList();
     }
 
-    function setProjectUserAccessLevel(level) {
-      const projectId = parseInt(document.getElementById('projectTabSelectValue').value);
-      const userId = activeProjectUserId;
-      if (!projectId || !userId) return;
-      
+    function setUserListFilter(filterType) {
+      currentUserListFilter = filterType;
+      updateFilterButtons();
+      renderUserList();
+    }
+
+    function updateFilterButtons() {
+      const buttons = {
+        'all': document.getElementById('filterAllUsers'),
+        'none': document.getElementById('filterNoAccessUsers'),
+        'read': document.getElementById('filterReadUsers'),
+        'full': document.getElementById('filterFullAccessUsers')
+      };
+
+      Object.keys(buttons).forEach(key => {
+        const button = buttons[key];
+        if (button) {
+          if (key === currentUserListFilter) {
+            button.style.background = '#7c3aed';
+            button.style.color = 'white';
+          } else {
+            button.style.background = '#e5e7eb';
+            button.style.color = '#374151';
+          }
+        }
+      });
+    }
+
+    function updateUserProjectAccess(userId, projectId, accessLevel) {
       let entry = access.find(a => a.user_id === userId && a.project_id === projectId);
       if (!entry) {
         entry = { user_id: userId, project_id: projectId, read_access: false, write_access: false };
@@ -1070,7 +1071,7 @@
       }
       
       // Set access based on level
-      switch(level) {
+      switch(accessLevel) {
         case 'none':
           entry.read_access = false;
           entry.write_access = false;
@@ -1087,72 +1088,39 @@
       
       scheduleSaveAccess();
       showTopNotification('Dostop uspešno shranjen.');
-      showProjectUserAccessCard();
-      loadProjectAccess();
+      
+      // Update the visual state of the checkboxes
+      updateUserAccessCheckboxes(userId, projectId, accessLevel);
+      
+      // Refresh the user list to show updated access levels
+      renderUserList();
     }
 
-    function toggleProjectUserWriteCheckbox() {
-      const read = document.getElementById('projectUserReadAccessCheckbox');
-      const write = document.getElementById('projectUserWriteAccessCheckbox');
-      if (!read.checked) {
-        write.checked = false;
-        write.disabled = true;
-      } else {
-        write.disabled = false;
+    function updateUserAccessCheckboxes(userId, projectId, accessLevel) {
+      const noAccessRadio = document.querySelector(`input[name="userAccess_${userId}"][value="none"]`);
+      const readAccessRadio = document.querySelector(`input[name="userAccess_${userId}"][value="read"]`);
+      const fullAccessRadio = document.querySelector(`input[name="userAccess_${userId}"][value="full"]`);
+      
+      if (noAccessRadio) {
+        const label = noAccessRadio.closest('label');
+        label.style.background = (accessLevel === 'none') ? 'rgba(124, 58, 237, 0.1)' : 'transparent';
+        label.style.color = (accessLevel === 'none') ? '#7c3aed' : '#6b7280';
+        label.style.fontWeight = (accessLevel === 'none') ? '600' : '400';
       }
-    }
-
-    function saveProjectUserAccess() {
-      const projectId = parseInt(document.getElementById('projectTabSelectValue').value);
-      const userId = parseInt(document.getElementById('projectUserSelectValue').value);
-      if (!projectId || !userId) return;
-      const readChecked = document.getElementById('projectUserReadAccessCheckbox').checked;
-      const writeChecked = document.getElementById('projectUserWriteAccessCheckbox').checked;
-      let entry = access.find(a => a.user_id === userId && a.project_id === projectId);
-      if (!entry) {
-        entry = { user_id: userId, project_id: projectId, read_access: false, write_access: false };
-        access.push(entry);
+      
+      if (readAccessRadio) {
+        const label = readAccessRadio.closest('label');
+        label.style.background = (accessLevel === 'read') ? 'rgba(124, 58, 237, 0.1)' : 'transparent';
+        label.style.color = (accessLevel === 'read') ? '#7c3aed' : '#6b7280';
+        label.style.fontWeight = (accessLevel === 'read') ? '600' : '400';
       }
-      entry.read_access = readChecked;
-      entry.write_access = writeChecked;
-      scheduleSaveAccess();
-      showTopNotification('Dostop uspešno shranjen.');
-      showProjectUserAccessCard();
-      loadProjectAccess(); // Refresh table
-    }
-
-    // Hide project tab suggestions dropdown when clicking outside
-    document.addEventListener('click', function(event) {
-      const projectTabSearch = document.getElementById('projectTabSearch');
-      const projectTabSuggestions = document.getElementById('projectTabSuggestions');
-      if (!projectTabSearch || !projectTabSuggestions) return;
-      if (!projectTabSearch.contains(event.target) && !projectTabSuggestions.contains(event.target)) {
-        projectTabSuggestions.classList.add('hidden');
+      
+      if (fullAccessRadio) {
+        const label = fullAccessRadio.closest('label');
+        label.style.background = (accessLevel === 'full') ? 'rgba(124, 58, 237, 0.1)' : 'transparent';
+        label.style.color = (accessLevel === 'full') ? '#7c3aed' : '#6b7280';
+        label.style.fontWeight = (accessLevel === 'full') ? '600' : '400';
       }
-    });
-
-    function loadProjectAccess() {
-      const projectId = parseInt(document.getElementById('projectTabSelectValue').value);
-      const section = document.getElementById('projectAccessSection');
-      const projectDetails = document.getElementById('projectDetails');
-      if (!projectId) return section.classList.add('hidden');
-      // Load project details
-      const project = projects.find(p => p.id === projectId);
-      if (project) {
-        projectDetails.innerHTML = `
-          <div class="user-avatar">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M22 19C22 19.5304 21.7893 20.0391 21.4142 20.4142C21.0391 20.7893 20.5304 21 20 21H4C3.46957 21 2.96086 20.7893 2.58579 20.4142C2.21071 20.0391 2 19.5304 2 19V5C2 4.46957 2.21071 3.96086 2.58579 3.58579C2.96086 3.21071 3.46957 3 4 3H9L11 6H20C20.5304 6 21.0391 6.21071 21.4142 6.58579C21.7893 6.96086 22 7.46957 22 8V19Z" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-          </div>
-          <div class="user-info">
-            <h3>${project.name}</h3>
-            <p>ID projekta: ${project.id}</p>
-          </div>
-        `;
-      }
-      // Always show the section (user search and access card)
-      section.classList.remove('hidden');
     }
 
     // Disable write checkbox if read is not checked
@@ -1225,7 +1193,7 @@
           listDiv.innerHTML = '<div class="full-access-list-title">Uporabniki s polnim dostopom</div><div>Ni uporabnikov s polnim dostopom.</div>';
         } else {
           listDiv.innerHTML = '<div class="full-access-list-title">Uporabniki s polnim dostopom</div>' +
-            '<ul>' + fullUsers.map(u => `<li>${u.name}${u.email ? ' (' + u.email + ')' : ''}</li>`).join('') + '</ul>';
+            '<ul>' + fullUsers.map(u => `<li>${u.email}</li>`).join('') + '</ul>';
         }
         listDiv.classList.remove('hidden');
       } else if (option === 'read') {
@@ -1258,7 +1226,7 @@
           listDiv.innerHTML = '<div class="full-access-list-title">Uporabniki s samo read dostopom</div><div>Ni uporabnikov s samo read dostopom.</div>';
         } else {
           listDiv.innerHTML = '<div class="full-access-list-title">Uporabniki s samo read dostopom</div>' +
-            '<ul>' + readUsers.map(u => `<li>${u.name}${u.email ? ' (' + u.email + ')' : ''}</li>`).join('') + '</ul>';
+            '<ul>' + readUsers.map(u => `<li>${u.email}</li>`).join('') + '</ul>';
         }
         listDiv.classList.remove('hidden');
       } else if (option === 'none') {
@@ -1292,7 +1260,7 @@
           listDiv.innerHTML = '<div class="full-access-list-title">Uporabniki brez dostopa</div><div>Ni uporabnikov brez dostopa.</div>';
         } else {
           listDiv.innerHTML = '<div class="full-access-list-title">Uporabniki brez dostopa</div>' +
-            '<ul>' + noAccessUsers.map(u => `<li>${u.name}${u.email ? ' (' + u.email + ')' : ''}</li>`).join('') + '</ul>';
+            '<ul>' + noAccessUsers.map(u => `<li>${u.email}</li>`).join('') + '</ul>';
         }
         listDiv.classList.remove('hidden');
       } else {
@@ -1323,7 +1291,7 @@
           const user = users.find(u => u.id === userId);
           if (user) {
             const userSearchInput = document.getElementById('userSearch');
-            if (userSearchInput) userSearchInput.value = user.name;
+            if (userSearchInput) userSearchInput.value = user.email;
           }
         }
         // Also clear and hide user project search and suggestions
@@ -1376,7 +1344,7 @@
         const user = users.find(u => u.id === userId);
         if (user) {
           const userSearchInput = document.getElementById('userSearch');
-          if (userSearchInput) userSearchInput.value = user.name;
+          if (userSearchInput) userSearchInput.value = user.email;
         }
       }
       // Also clear and hide user project search and suggestions
@@ -1401,7 +1369,7 @@
       // Deselect all selected projects
       selectedUserProjects = [];
       activeUserProjectId = null;
-      updateUserProjectChips();
+      document.getElementById('userProjectSearch').value = '';
       showUserProjectAccessCard();
       // Show/hide full access user list based on filter
       const userAccessList = document.getElementById('userFullAccessProjectList');
@@ -1425,10 +1393,32 @@
           .map(a => projects.find(p => p.id === a.project_id))
           .filter(Boolean);
         if (fullProjects.length === 0) {
-          userAccessList.innerHTML = '<div class="full-access-list-title">Projekti s polnim dostopom</div><div>Ni projektov s polnim dostopom.</div>';
+          userAccessList.innerHTML = `
+            <div style="padding: 32px; text-align: center; color: #6b7280;">
+              <div style="font-size: 16px; margin-bottom: 8px;">Ni projektov</div>
+              <div style="font-size: 14px;">Ni projektov s polnim dostopom</div>
+            </div>
+          `;
         } else {
-          userAccessList.innerHTML = '<div class="full-access-list-title">Projekti s polnim dostopom</div>' +
-            '<ul>' + fullProjects.map(p => `<li>${p.name}${p.id ? ' (ID: ' + p.id + ')' : ''}</li>`).join('') + '</ul>';
+          let html = '';
+          fullProjects.forEach(project => {
+            html += `
+              <div style="display: flex; align-items: center; padding: 8px 12px; border-bottom: 1px solid #f3f4f6; transition: background-color 0.2s;" 
+                   onmouseover="this.style.backgroundColor='#f9fafb'" 
+                   onmouseout="this.style.backgroundColor='transparent'">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <div style="width: 32px; height: 32px; background: #7c3aed; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 600; font-size: 14px;">
+                    ${project.name.charAt(0).toUpperCase()}
+                  </div>
+                  <div>
+                    <div style="font-weight: 600; color: #1f2937; font-size: 14px;">${project.name}</div>
+                    <div style="color: #6b7280; font-size: 12px;">ID: ${project.id}</div>
+                  </div>
+                </div>
+              </div>
+            `;
+          });
+          userAccessList.innerHTML = html;
         }
         userAccessList.classList.remove('hidden');
       } else if (option === 'read') {
@@ -1450,10 +1440,32 @@
           .map(a => projects.find(p => p.id === a.project_id))
           .filter(Boolean);
         if (readProjects.length === 0) {
-          userAccessList.innerHTML = '<div class="full-access-list-title">Projekti s samo read dostopom</div><div>Ni projektov s samo read dostopom.</div>';
+          userAccessList.innerHTML = `
+            <div style="padding: 32px; text-align: center; color: #6b7280;">
+              <div style="font-size: 16px; margin-bottom: 8px;">Ni projektov</div>
+              <div style="font-size: 14px;">Ni projektov s samo read dostopom</div>
+            </div>
+          `;
         } else {
-          userAccessList.innerHTML = '<div class="full-access-list-title">Projekti s samo read dostopom</div>' +
-            '<ul>' + readProjects.map(p => `<li>${p.name}${p.id ? ' (ID: ' + p.id + ')' : ''}</li>`).join('') + '</ul>';
+          let html = '';
+          readProjects.forEach(project => {
+            html += `
+              <div style="display: flex; align-items: center; padding: 8px 12px; border-bottom: 1px solid #f3f4f6; transition: background-color 0.2s;" 
+                   onmouseover="this.style.backgroundColor='#f9fafb'" 
+                   onmouseout="this.style.backgroundColor='transparent'">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <div style="width: 32px; height: 32px; background: #7c3aed; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 600; font-size: 14px;">
+                    ${project.name.charAt(0).toUpperCase()}
+                  </div>
+                  <div>
+                    <div style="font-weight: 600; color: #1f2937; font-size: 14px;">${project.name}</div>
+                    <div style="color: #6b7280; font-size: 12px;">ID: ${project.id}</div>
+                  </div>
+                </div>
+              </div>
+            `;
+          });
+          userAccessList.innerHTML = html;
         }
         userAccessList.classList.remove('hidden');
       } else if (option === 'none') {
@@ -1476,10 +1488,32 @@
           return !a || (!a.read_access && !a.write_access);
         });
         if (noAccessProjects.length === 0) {
-          userAccessList.innerHTML = '<div class="full-access-list-title">Projekti brez dostopa</div><div>Ni projektov brez dostopa.</div>';
+          userAccessList.innerHTML = `
+            <div style="padding: 32px; text-align: center; color: #6b7280;">
+              <div style="font-size: 16px; margin-bottom: 8px;">Ni projektov</div>
+              <div style="font-size: 14px;">Ni projektov brez dostopa</div>
+            </div>
+          `;
         } else {
-          userAccessList.innerHTML = '<div class="full-access-list-title">Projekti brez dostopa</div>' +
-            '<ul>' + noAccessProjects.map(p => `<li>${p.name}${p.id ? ' (ID: ' + p.id + ')' : ''}</li>`).join('') + '</ul>';
+          let html = '';
+          noAccessProjects.forEach(project => {
+            html += `
+              <div style="display: flex; align-items: center; padding: 8px 12px; border-bottom: 1px solid #f3f4f6; transition: background-color 0.2s;" 
+                   onmouseover="this.style.backgroundColor='#f9fafb'" 
+                   onmouseout="this.style.backgroundColor='transparent'">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <div style="width: 32px; height: 32px; background: #7c3aed; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 600; font-size: 14px;">
+                    ${project.name.charAt(0).toUpperCase()}
+                  </div>
+                  <div>
+                    <div style="font-weight: 600; color: #1f2937; font-size: 14px;">${project.name}</div>
+                    <div style="color: #6b7280; font-size: 12px;">ID: ${project.id}</div>
+                  </div>
+                </div>
+              </div>
+            `;
+          });
+          userAccessList.innerHTML = html;
         }
         userAccessList.classList.remove('hidden');
       } else {
@@ -1508,8 +1542,9 @@
       const suggestionsDiv = document.getElementById('userProjectSuggestions');
       const search = input.value.toLowerCase();
       suggestionsDiv.innerHTML = '';
-      // Only show projects not already selected
-      const filtered = projects.filter(p => p.name.toLowerCase().includes(search) && !selectedUserProjects.includes(p.id));
+      
+      // Show all projects that match the search (no filtering by selection since only one allowed)
+      const filtered = projects.filter(p => p.name.toLowerCase().includes(search));
       if (filtered.length === 0) {
         suggestionsDiv.classList.add('hidden');
         return;
@@ -1560,67 +1595,28 @@
       const allProjectsAccessCard = document.getElementById('userAllProjectsAccessCard');
       if (allProjectsAccessCard) allProjectsAccessCard.classList.add('hidden');
       
-      // Add project to selectedUserProjects if not already present
-      if (!selectedUserProjects.includes(projectId)) {
-        selectedUserProjects.push(projectId);
-      }
+      // Clear any existing project selection and set only this one
+      selectedUserProjects = [projectId];
       activeUserProjectId = projectId;
-      document.getElementById('userProjectSearch').value = '';
+      document.getElementById('userProjectSearch').value = projectName;
       document.getElementById('userProjectSuggestions').classList.add('hidden');
-      updateUserProjectChips();
       showUserProjectAccessCard();
     }
 
-    function updateUserProjectChips() {
-      const chipsDiv = document.getElementById('userProjectChips');
-      chipsDiv.innerHTML = '';
-      selectedUserProjects.forEach(projectId => {
-        const project = projects.find(p => p.id === projectId);
-        if (!project) return;
-        const chip = document.createElement('div');
-        chip.style.display = 'flex';
-        chip.style.alignItems = 'center';
-        chip.style.background = activeUserProjectId === projectId ? '#ede9fe' : '#f3f4f6';
-        chip.style.color = '#374151';
-        chip.style.borderRadius = '16px';
-        chip.style.padding = '4px 10px 4px 10px';
-        chip.style.fontSize = '15px';
-        chip.style.marginRight = '2px';
-        chip.style.cursor = 'pointer';
-        chip.style.border = activeUserProjectId === projectId ? '1.5px solid #7c3aed' : '1px solid #d1d5db';
-        chip.textContent = project.name;
-        chip.onclick = function(e) {
-          e.stopPropagation();
-          activeUserProjectId = projectId;
-          updateUserProjectChips();
-          showUserProjectAccessCard();
-        };
-        // Add x button
-        const xBtn = document.createElement('span');
-        xBtn.textContent = '×';
-        xBtn.style.marginLeft = '8px';
-        xBtn.style.fontWeight = 'bold';
-        xBtn.style.cursor = 'pointer';
-        xBtn.onclick = function(e) {
-          e.stopPropagation();
-          // Remove project from selectedUserProjects
-          selectedUserProjects = selectedUserProjects.filter(id => id !== projectId);
-          // If removed project was active, pick another or clear
-          if (activeUserProjectId === projectId) {
-            activeUserProjectId = selectedUserProjects.length > 0 ? selectedUserProjects[0] : null;
-          }
-          updateUserProjectChips();
-          showUserProjectAccessCard();
-        };
-        chip.appendChild(xBtn);
-        chipsDiv.appendChild(chip);
-      });
-      // Set placeholder based on number of selected projects
-      const userProjectSearch = document.getElementById('userProjectSearch');
-      if (userProjectSearch) {
-        userProjectSearch.placeholder = selectedUserProjects.length > 0 ? '' : 'Vpiši ime projekta...';
-      }
+    function showProjectSuggestionsOnClick() {
+      // Show suggestions when clicking on input field without clearing selection
+      showUserProjectSuggestions();
     }
+
+    function clearProjectSelection() {
+      // Clear the current project selection
+      selectedUserProjects = [];
+      activeUserProjectId = null;
+      document.getElementById('userProjectSearch').value = '';
+      showUserProjectAccessCard();
+    }
+
+
 
     function showUserProjectAccessCard() {
       const userId = parseInt(document.getElementById('userSelectValue').value);
@@ -1695,7 +1691,7 @@
           entry.read_access = true;
           entry.write_access = true;
           break;
-      }
+        }
       
       scheduleSaveAccess();
       showTopNotification('Dostop uspešno shranjen.');
@@ -1810,33 +1806,29 @@
 
       const accessCard = document.getElementById('userAllProjectsAccessCard');
       
-      // Close ALL possible popups and dropdowns when button is clicked
-      closeAllPopups();
-      
-      // Toggle visibility
-      accessCard.classList.toggle('hidden');
-      if (!accessCard.classList.contains('hidden')) {
-        // Close individual project customization if open
-        const userProjectAccessCard = document.getElementById('userProjectAccessCard');
-        if (userProjectAccessCard) {
-          userProjectAccessCard.classList.add('hidden');
-          userProjectAccessCard.innerHTML = '';
+        // Close ALL possible popups and dropdowns when button is clicked
+        closeAllPopups();
+        
+        // Toggle visibility
+        accessCard.classList.toggle('hidden');
+        if (!accessCard.classList.contains('hidden')) {
+          // Close individual project customization if open
+          const userProjectAccessCard = document.getElementById('userProjectAccessCard');
+          if (userProjectAccessCard) {
+            userProjectAccessCard.classList.add('hidden');
+            userProjectAccessCard.innerHTML = '';
+          }
+          
+          // Clear individual project selection
+          selectedUserProjects = [];
+          activeUserProjectId = null;
+          document.getElementById('userProjectSearch').value = '';
+          const userProjectSuggestions = document.getElementById('userProjectSuggestions');
+          if (userProjectSuggestions) userProjectSuggestions.classList.add('hidden');
+          
+          updateAllProjectsAccessButtons();
         }
-        
-        // Clear individual project selection
-        selectedUserProjects = [];
-        activeUserProjectId = null;
-        updateUserProjectChips();
-        
-        // Clear project search
-        const userProjectSearch = document.getElementById('userProjectSearch');
-        if (userProjectSearch) userProjectSearch.value = '';
-        const userProjectSuggestions = document.getElementById('userProjectSuggestions');
-        if (userProjectSuggestions) userProjectSuggestions.classList.add('hidden');
-        
-        updateAllProjectsAccessButtons();
       }
-    }
 
     function setAllProjectsAccessLevel(level) {
       const userId = parseInt(document.getElementById('userSelectValue').value);
@@ -1846,12 +1838,12 @@
       closeAllPopups();
       
       // Handle access changes for all projects
-      projects.forEach(project => {
-        let entry = access.find(a => a.user_id === userId && a.project_id === project.id);
-        if (!entry) {
-          entry = { user_id: userId, project_id: project.id, read_access: false, write_access: false };
-          access.push(entry);
-        }
+        projects.forEach(project => {
+          let entry = access.find(a => a.user_id === userId && a.project_id === project.id);
+          if (!entry) {
+            entry = { user_id: userId, project_id: project.id, read_access: false, write_access: false };
+            access.push(entry);
+          }
         
         // Set access based on level
         switch(level) {
@@ -1867,8 +1859,8 @@
             entry.read_access = true;
             entry.write_access = true;
             break;
-        }
-      });
+          }
+        });
       
       scheduleSaveAccess();
       showTopNotification('Dostop uspešno shranjen.');
@@ -1930,5 +1922,4 @@
       updateAllProjectsAccessButtons();
     }
   </script>
-</body>
 </html>
