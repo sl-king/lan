@@ -9,25 +9,25 @@
     "user_id": 1,
     "project_id": 2,
     "read_access": true,
-    "write_access": true
+    "write_access": false
   },
   {
     "user_id": 1,
     "project_id": 4,
     "read_access": true,
-    "write_access": true
+    "write_access": false
   },
   {
     "user_id": 1,
     "project_id": 5,
     "read_access": true,
-    "write_access": true
+    "write_access": false
   },
   {
     "user_id": 1,
     "project_id": 6,
     "read_access": true,
-    "write_access": true
+    "write_access": false
   },
   {
     "user_id": 2,
@@ -44,14 +44,14 @@
   {
     "user_id": 2,
     "project_id": 4,
-    "read_access": true,
+    "read_access": false,
     "write_access": false
   },
   {
     "user_id": 2,
     "project_id": 5,
-    "read_access": true,
-    "write_access": true
+    "read_access": false,
+    "write_access": false
   },
   {
     "user_id": 2,
@@ -80,8 +80,8 @@
   {
     "user_id": 3,
     "project_id": 5,
-    "read_access": true,
-    "write_access": true
+    "read_access": false,
+    "write_access": false
   },
   {
     "user_id": 3,
@@ -93,12 +93,12 @@
     "user_id": 4,
     "project_id": 1,
     "read_access": true,
-    "write_access": true
+    "write_access": false
   },
   {
     "user_id": 4,
     "project_id": 2,
-    "read_access": true,
+    "read_access": false,
     "write_access": false
   },
   {
@@ -118,12 +118,6 @@
     "project_id": 6,
     "read_access": false,
     "write_access": false
-  },
-  {
-    "user_id": 5,
-    "project_id": 1,
-    "read_access": true,
-    "write_access": true
   },
   {
     "user_id": 5,
